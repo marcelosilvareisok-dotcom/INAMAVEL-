@@ -31,6 +31,7 @@ export default function Editor() {
   const [viewMode, setViewMode] = React.useState<'desktop' | 'mobile'>('desktop');
   const [activeTab, setActiveTab] = React.useState<'content' | 'design' | 'settings'>('content');
   const [showPublishModal, setShowPublishModal] = React.useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
   const navigate = useNavigate();
 
   // Remember last project
@@ -133,25 +134,25 @@ export default function Editor() {
   return (
     <div className="h-screen flex flex-col bg-[#050505] overflow-hidden">
       {/* Editor Header */}
-      <header className="h-16 border-b border-white/5 bg-[#050505] flex items-center justify-between px-4 z-50">
-        <div className="flex items-center gap-4">
+      <header className="h-16 border-b border-white/5 bg-[#050505] flex items-center justify-between px-2 md:px-4 z-50">
+        <div className="flex items-center gap-2 md:gap-4">
           <button 
             onClick={() => navigate('/dashboard')}
             className="p-2 hover:bg-white/5 rounded-lg transition-colors text-white/40 hover:text-white"
           >
             <ArrowLeft size={20} />
           </button>
-          <div className="h-8 w-px bg-white/10 mx-2" />
-          <div className="flex flex-col">
+          <div className="h-8 w-px bg-white/10 mx-1 md:mx-2" />
+          <div className="flex flex-col min-w-0">
             <div className="flex items-center gap-2">
-              <h1 className="text-sm font-bold truncate max-w-[150px]">{project.name}</h1>
+              <h1 className="text-xs md:text-sm font-bold truncate max-w-[80px] md:max-w-[150px]">{project.name}</h1>
               <AnimatePresence mode="wait">
                 {saving === 'saving' && (
                   <motion.div
                     initial={{ opacity: 0, x: -5 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0 }}
-                    className="flex items-center gap-1 text-[10px] text-purple-400 font-bold uppercase tracking-widest"
+                    className="hidden md:flex items-center gap-1 text-[10px] text-purple-400 font-bold uppercase tracking-widest"
                   >
                     <div className="w-1 h-1 bg-purple-400 rounded-full animate-pulse" />
                     Salvando...
@@ -162,7 +163,7 @@ export default function Editor() {
                     initial={{ opacity: 0, x: -5 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0 }}
-                    className="flex items-center gap-1 text-[10px] text-green-500 font-bold uppercase tracking-widest"
+                    className="hidden md:flex items-center gap-1 text-[10px] text-green-500 font-bold uppercase tracking-widest"
                   >
                     <CheckCircle2 size={10} />
                     Salvo
@@ -170,11 +171,11 @@ export default function Editor() {
                 )}
               </AnimatePresence>
             </div>
-            <p className="text-[10px] text-white/40 uppercase tracking-widest font-black">{project.type}</p>
+            <p className="text-[8px] md:text-[10px] text-white/40 uppercase tracking-widest font-black truncate">{project.type}</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 bg-white/5 p-1 rounded-xl border border-white/10">
+        <div className="hidden sm:flex items-center gap-2 bg-white/5 p-1 rounded-xl border border-white/10">
           <button 
             onClick={() => setViewMode('desktop')}
             className={`p-2 rounded-lg transition-all ${viewMode === 'desktop' ? 'bg-white text-black' : 'text-white/40 hover:text-white'}`}
@@ -189,28 +190,43 @@ export default function Editor() {
           </button>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 md:gap-3">
+          <button 
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            className="lg:hidden p-2 bg-white/5 border border-white/10 rounded-xl text-white/40 hover:text-white"
+          >
+            <Layout size={18} />
+          </button>
           <button 
             onClick={handleSave}
             disabled={saving === 'saving'}
-            className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-sm font-bold hover:bg-white/10 transition-all disabled:opacity-50"
+            className="flex items-center gap-2 px-3 md:px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-xs md:text-sm font-bold hover:bg-white/10 transition-all disabled:opacity-50"
           >
             <Save size={16} />
-            {saving === 'saving' ? 'Salvando...' : 'Salvar'}
+            <span className="hidden md:inline">{saving === 'saving' ? 'Salvando...' : 'Salvar'}</span>
           </button>
           <button 
             onClick={handlePublish}
-            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-red-500 text-white rounded-xl text-sm font-bold hover:scale-105 transition-all shadow-lg shadow-purple-500/20"
+            className="flex items-center gap-2 px-3 md:px-4 py-2 bg-gradient-to-r from-purple-500 to-red-500 text-white rounded-xl text-xs md:text-sm font-bold hover:scale-105 transition-all shadow-lg shadow-purple-500/20"
           >
             <Globe size={16} />
-            Publicar
+            <span className="hidden md:inline">Publicar</span>
           </button>
         </div>
       </header>
 
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex overflow-hidden relative">
         {/* Sidebar Left - Tools */}
-        <aside className="w-72 border-r border-white/5 bg-[#050505] flex flex-col">
+        <aside className={`
+          fixed inset-y-0 left-0 z-40 w-72 bg-[#050505] border-r border-white/5 transform transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0
+          ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+        `}>
+          <div className="flex items-center justify-between p-4 border-b border-white/5 lg:hidden">
+            <span className="text-xs font-black uppercase tracking-widest text-white/40">Menu do Editor</span>
+            <button onClick={() => setIsSidebarOpen(false)} className="p-2 hover:bg-white/5 rounded-lg text-white/40">
+              <X size={20} />
+            </button>
+          </div>
           <div className="flex p-2 gap-1 border-b border-white/5">
             {[
               { id: 'content', icon: Layout, label: 'Estrutura' },
@@ -284,32 +300,45 @@ export default function Editor() {
         </aside>
 
         {/* Preview Area */}
-        <main className="flex-1 bg-[#111] p-8 overflow-y-auto flex justify-center">
-          <div className={`bg-white text-black transition-all duration-500 shadow-2xl overflow-hidden rounded-2xl ${
-            viewMode === 'desktop' ? 'w-full max-w-5xl' : 'w-[375px]'
+        <main className="flex-1 bg-[#111] p-2 md:p-8 overflow-y-auto flex justify-center relative">
+          {/* Mobile Sidebar Overlay */}
+          <AnimatePresence>
+            {isSidebarOpen && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setIsSidebarOpen(false)}
+                className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 lg:hidden"
+              />
+            )}
+          </AnimatePresence>
+
+          <div className={`bg-white text-black transition-all duration-500 shadow-2xl overflow-hidden rounded-2xl h-fit ${
+            viewMode === 'desktop' ? 'w-full max-w-5xl' : 'w-full max-w-[375px]'
           }`}>
             {/* Mock Website Content */}
             <div className="min-h-full font-sans">
               {content.sections?.map((section: any) => (
-                <section key={section.id} className={`p-12 ${section.type === 'hero' ? 'bg-black text-white' : 'bg-white text-black'}`}>
-                  <h2 className={`text-4xl font-black tracking-tighter mb-4 ${section.type === 'hero' ? 'text-5xl md:text-6xl' : ''}`}>
+                <section key={section.id} className={`p-6 md:p-12 ${section.type === 'hero' ? 'bg-black text-white' : 'bg-white text-black'}`}>
+                  <h2 className={`text-2xl md:text-4xl font-black tracking-tighter mb-4 ${section.type === 'hero' ? 'text-3xl md:text-6xl' : ''}`}>
                     {section.title}
                   </h2>
-                  <p className={`text-lg leading-relaxed ${section.type === 'hero' ? 'text-white/60' : 'text-black/60'}`}>
+                  <p className={`text-sm md:text-lg leading-relaxed ${section.type === 'hero' ? 'text-white/60' : 'text-black/60'}`}>
                     {section.content}
                   </p>
                   {section.items && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-8 md:mt-12">
                       {section.items.map((item: string, i: number) => (
-                        <div key={i} className={`p-6 rounded-2xl border ${section.type === 'hero' ? 'bg-white/5 border-white/10' : 'bg-black/5 border-black/10'}`}>
-                          <p className="font-bold">{item}</p>
+                        <div key={i} className={`p-4 md:p-6 rounded-2xl border ${section.type === 'hero' ? 'bg-white/5 border-white/10' : 'bg-black/5 border-black/10'}`}>
+                          <p className="font-bold text-sm md:text-base">{item}</p>
                         </div>
                       ))}
                     </div>
                   )}
                 </section>
               ))}
-              <footer className="p-8 text-center text-xs text-black/40 border-t border-black/5">
+              <footer className="p-6 md:p-8 text-center text-[10px] md:text-xs text-black/40 border-t border-black/5">
                 Feito com Inabalável💔
               </footer>
             </div>

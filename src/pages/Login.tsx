@@ -137,6 +137,20 @@ export default function Login() {
               </div>
             </div>
 
+            <div className="flex items-center justify-between text-xs">
+              <label className="flex items-center gap-2 cursor-pointer group">
+                <div className="w-4 h-4 rounded border border-white/20 flex items-center justify-center group-hover:border-purple-500 transition-colors">
+                  <div className="w-2 h-2 bg-purple-500 rounded-sm opacity-100" />
+                </div>
+                <span className="text-white/40 group-hover:text-white/60 transition-colors">Lembrar acesso</span>
+              </label>
+              {isLogin && (
+                <button type="button" className="text-purple-400 hover:text-purple-300 transition-colors font-medium">
+                  Esqueceu a senha?
+                </button>
+              )}
+            </div>
+
             {error && (
               <p className="text-red-500 text-sm font-medium bg-red-500/10 p-3 rounded-lg border border-red-500/20">
                 {error}

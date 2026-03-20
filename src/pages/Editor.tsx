@@ -27,11 +27,18 @@ export default function Editor() {
   const { id } = useParams<{ id: string }>();
   const [project, setProject] = React.useState<Project | null>(null);
   const [loading, setLoading] = React.useState(true);
-  const [saving, setSaving] = React.useState(false);
+  const [saving, setSaving] = React.useState<'idle' | 'saving' | 'saved'>('idle');
   const [viewMode, setViewMode] = React.useState<'desktop' | 'mobile'>('desktop');
   const [activeTab, setActiveTab] = React.useState<'content' | 'design' | 'settings'>('content');
   const [showPublishModal, setShowPublishModal] = React.useState(false);
   const navigate = useNavigate();
+
+  // Remember last project
+  React.useEffect(() => {
+    if (id) {
+      localStorage.setItem('last_project_id', id);
+    }
+  }, [id]);
 
   React.useEffect(() => {
     const fetchProject = async () => {
@@ -46,20 +53,43 @@ export default function Editor() {
     fetchProject();
   }, [id]);
 
+  // Auto-save logic
+  React.useEffect(() => {
+    if (!project || loading) return;
+
+    const timeout = setTimeout(async () => {
+      setSaving('saving');
+      try {
+        const docRef = doc(db, 'projects', id!);
+        await updateDoc(docRef, {
+          ...project,
+          updatedAt: new Date().toISOString()
+        });
+        setSaving('saved');
+        setTimeout(() => setSaving('idle'), 2000);
+      } catch (error) {
+        console.error("Erro ao salvar automaticamente:", error);
+        setSaving('idle');
+      }
+    }, 2000); // Save after 2 seconds of inactivity
+
+    return () => clearTimeout(timeout);
+  }, [project, id]);
+
   const handleSave = async () => {
     if (!project || !id) return;
-    setSaving(true);
+    setSaving('saving');
     try {
       const docRef = doc(db, 'projects', id);
       await updateDoc(docRef, {
         ...project,
         updatedAt: new Date().toISOString()
       });
-      // Show success toast or something
+      setSaving('saved');
+      setTimeout(() => setSaving('idle'), 2000);
     } catch (error) {
       console.error("Erro ao salvar:", error);
-    } finally {
-      setSaving(false);
+      setSaving('idle');
     }
   };
 
@@ -112,8 +142,34 @@ export default function Editor() {
             <ArrowLeft size={20} />
           </button>
           <div className="h-8 w-px bg-white/10 mx-2" />
-          <div>
-            <h1 className="text-sm font-bold truncate max-w-[150px]">{project.name}</h1>
+          <div className="flex flex-col">
+            <div className="flex items-center gap-2">
+              <h1 className="text-sm font-bold truncate max-w-[150px]">{project.name}</h1>
+              <AnimatePresence mode="wait">
+                {saving === 'saving' && (
+                  <motion.div
+                    initial={{ opacity: 0, x: -5 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0 }}
+                    className="flex items-center gap-1 text-[10px] text-purple-400 font-bold uppercase tracking-widest"
+                  >
+                    <div className="w-1 h-1 bg-purple-400 rounded-full animate-pulse" />
+                    Salvando...
+                  </motion.div>
+                )}
+                {saving === 'saved' && (
+                  <motion.div
+                    initial={{ opacity: 0, x: -5 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0 }}
+                    className="flex items-center gap-1 text-[10px] text-green-500 font-bold uppercase tracking-widest"
+                  >
+                    <CheckCircle2 size={10} />
+                    Salvo
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
             <p className="text-[10px] text-white/40 uppercase tracking-widest font-black">{project.type}</p>
           </div>
         </div>
@@ -136,11 +192,11 @@ export default function Editor() {
         <div className="flex items-center gap-3">
           <button 
             onClick={handleSave}
-            disabled={saving}
+            disabled={saving === 'saving'}
             className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-sm font-bold hover:bg-white/10 transition-all disabled:opacity-50"
           >
             <Save size={16} />
-            {saving ? 'Salvando...' : 'Salvar'}
+            {saving === 'saving' ? 'Salvando...' : 'Salvar'}
           </button>
           <button 
             onClick={handlePublish}

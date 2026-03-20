@@ -24,6 +24,7 @@ export default function Dashboard() {
   const [projects, setProjects] = React.useState<Project[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [searchTerm, setSearchTerm] = React.useState('');
+  const [lastProject, setLastProject] = React.useState<Project | null>(null);
 
   React.useEffect(() => {
     if (!auth.currentUser) return;
@@ -41,6 +42,13 @@ export default function Dashboard() {
       })) as Project[];
       setProjects(projectsData);
       setLoading(false);
+
+      // Check for last project in memory
+      const lastId = localStorage.getItem('last_project_id');
+      if (lastId) {
+        const found = projectsData.find(p => p.id === lastId);
+        if (found) setLastProject(found);
+      }
     });
 
     return () => unsubscribe();
@@ -58,13 +66,24 @@ export default function Dashboard() {
           <h1 className="text-3xl font-black tracking-tighter">MEUS PROJETOS</h1>
           <p className="text-white/60">Gerencie suas criações extraordinárias.</p>
         </div>
-        <Link
-          to="/new"
-          className="flex items-center justify-center gap-2 px-6 py-3 bg-white text-black font-bold rounded-xl hover:bg-white/90 transition-all shadow-lg shadow-white/5 active:scale-95"
-        >
-          <Plus size={20} />
-          Novo Projeto
-        </Link>
+        <div className="flex items-center gap-3">
+          {lastProject && (
+            <Link
+              to={`/editor/${lastProject.id}`}
+              className="hidden sm:flex items-center gap-2 px-4 py-3 bg-white/5 border border-white/10 text-white font-bold rounded-xl hover:bg-white/10 transition-all active:scale-95"
+            >
+              <Clock size={18} className="text-purple-400" />
+              Continuar: {lastProject.name}
+            </Link>
+          )}
+          <Link
+            to="/new"
+            className="flex items-center justify-center gap-2 px-6 py-3 bg-white text-black font-bold rounded-xl hover:bg-white/90 transition-all shadow-lg shadow-white/5 active:scale-95"
+          >
+            <Plus size={20} />
+            Novo Projeto
+          </Link>
+        </div>
       </div>
 
       {/* Stats / Quick Info */}

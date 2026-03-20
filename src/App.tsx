@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'r
 import { auth, db } from './firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, onSnapshot } from 'firebase/firestore';
+import { motion } from 'motion/react';
+import { Heart } from 'lucide-react';
 import { UserProfile } from './types';
 
 // Pages
@@ -30,8 +32,26 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
   }, []);
 
   if (loading) return (
-    <div className="h-screen flex items-center justify-center bg-[#050505]">
-      <div className="w-12 h-12 border-4 border-purple-500/20 border-t-purple-500 rounded-full animate-spin" />
+    <div className="h-screen flex flex-col items-center justify-center bg-[#050505] gap-6">
+      <motion.div
+        animate={{ scale: [1, 1.1, 1], opacity: [0.5, 1, 0.5] }}
+        transition={{ duration: 2, repeat: Infinity }}
+        className="relative"
+      >
+        <Heart size={48} className="text-red-500 fill-red-500" />
+        <div className="absolute inset-0 blur-2xl bg-red-500/20 -z-10" />
+      </motion.div>
+      <div className="flex flex-col items-center gap-2">
+        <div className="w-48 h-1 bg-white/5 rounded-full overflow-hidden">
+          <motion.div
+            initial={{ x: '-100%' }}
+            animate={{ x: '100%' }}
+            transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
+            className="w-full h-full bg-gradient-to-r from-transparent via-purple-500 to-transparent"
+          />
+        </div>
+        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20">Sincronizando Memória...</p>
+      </div>
     </div>
   );
 

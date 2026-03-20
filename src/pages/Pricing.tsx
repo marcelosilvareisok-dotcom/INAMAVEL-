@@ -1,11 +1,13 @@
 import React from 'react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { Coins, Zap, Sparkles, Check, ArrowRight, Heart } from 'lucide-react';
 import { db, auth } from '../firebase';
 import { doc, updateDoc, increment, setDoc } from 'firebase/firestore';
 
 export default function Pricing() {
   const [loading, setLoading] = React.useState<string | null>(null);
+
+  const [showSuccess, setShowSuccess] = React.useState<{ coins: number } | null>(null);
 
   const handlePurchase = async (amount: number, coins: number) => {
     if (!auth.currentUser) return;
@@ -30,7 +32,7 @@ export default function Pricing() {
         createdAt: new Date().toISOString()
       });
 
-      alert(`Sucesso! Você recebeu ${coins} moedas.`);
+      setShowSuccess({ coins });
     } catch (error) {
       console.error("Erro na compra:", error);
     } finally {
@@ -46,6 +48,41 @@ export default function Pricing() {
 
   return (
     <div className="space-y-12 pb-20">
+      <AnimatePresence>
+        {showSuccess && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowSuccess(null)}
+              className="absolute inset-0 bg-black/80 backdrop-blur-md"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative w-full max-w-sm bg-[#0a0a0a] border border-white/10 rounded-[40px] p-12 text-center"
+            >
+              <div className="w-20 h-20 bg-yellow-500/20 rounded-3xl flex items-center justify-center mx-auto mb-8">
+                <Coins size={40} className="text-yellow-500" />
+              </div>
+              <h2 className="text-3xl font-black tracking-tighter mb-4">RECARGA CONCLUÍDA!</h2>
+              <p className="text-white/60 mb-8">
+                Você recebeu {showSuccess.coins} moedas extraordinárias. 
+                Sua criatividade agora não tem limites.
+              </p>
+              <button 
+                onClick={() => setShowSuccess(null)}
+                className="w-full py-4 bg-white text-black font-bold rounded-2xl hover:bg-white/90 transition-all"
+              >
+                Continuar Criando
+              </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       <div className="text-center max-w-2xl mx-auto">
         <h1 className="text-4xl md:text-6xl font-black tracking-tighter mb-4">ABASTEÇA SUA <span className="text-purple-500">CRIATIVIDADE</span>.</h1>
         <p className="text-xl text-white/60">

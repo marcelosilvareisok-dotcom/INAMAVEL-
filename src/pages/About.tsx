@@ -13,13 +13,13 @@ export default function About() {
           className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-red-500/10 border border-red-500/20 mb-8"
         >
           <Heart size={14} className="text-red-500 fill-red-500" />
-          <span className="text-sm font-bold text-red-500 uppercase tracking-widest">O Manifesto Inamável</span>
+          <span className="text-sm font-bold text-red-500 uppercase tracking-widest">O Manifesto Inabalável</span>
         </motion.div>
         <h1 className="text-5xl md:text-8xl font-black tracking-tighter mb-8 leading-[0.9]">
           PARA OS <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-red-500">IGNORADOS</span> QUE QUEREM DOMINAR.
         </h1>
         <p className="text-xl text-white/60 leading-relaxed">
-          Inamável💔 não é apenas uma ferramenta. É um movimento. 
+          Inabalável💔 não é apenas uma ferramenta. É um movimento. 
           Nascemos da ideia de que as visões mais poderosas muitas vezes vêm de quem ninguém espera.
         </p>
       </section>
@@ -42,7 +42,7 @@ export default function About() {
         <div className="space-y-8">
           <h2 className="text-4xl font-black tracking-tighter">"NINGUÉM LIGA ATÉ QUE TODO MUNDO USE."</h2>
           <p className="text-lg text-white/60 leading-relaxed">
-            Olá, eu sou Marcelo da Silva Reis. Criei o Inamável💔 porque cansei de ver ideias incríveis morrendo 
+            Olá, eu sou Marcelo da Silva Reis. Criei o Inabalável💔 porque cansei de ver ideias incríveis morrendo 
             na praia por falta de recursos técnicos. 
             Minha missão é democratizar a criação extraordinária.
           </p>
@@ -95,7 +95,7 @@ export default function About() {
 
       {/* CTA */}
       <section className="text-center py-20">
-        <h2 className="text-4xl md:text-6xl font-black tracking-tighter mb-8">PRONTO PARA SER <span className="text-red-500">INAMÁVEL</span>?</h2>
+        <h2 className="text-4xl md:text-6xl font-black tracking-tighter mb-8">PRONTO PARA SER <span className="text-red-500">INABALÁVEL</span>?</h2>
         <button className="px-12 py-6 bg-white text-black font-black rounded-3xl hover:scale-105 transition-all shadow-2xl shadow-white/5 flex items-center gap-3 mx-auto group">
           Começar Agora <ArrowRight size={24} className="group-hover:translate-x-2 transition-transform" />
         </button>

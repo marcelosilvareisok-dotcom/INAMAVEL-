@@ -52,7 +52,7 @@ export default function Layout({ children, user, coins }: LayoutProps) {
                 <div className="absolute -top-1 -right-1 w-2 h-2 bg-purple-500 rounded-full animate-pulse" />
               </div>
               <span className="text-xl font-bold bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent">
-                Inamável
+                Inabalável
               </span>
             </Link>
           </div>
@@ -117,13 +117,13 @@ export default function Layout({ children, user, coins }: LayoutProps) {
           <div className="mt-auto p-4 border-t border-white/5">
             <div className="p-4 rounded-2xl bg-gradient-to-br from-purple-500/10 to-red-500/10 border border-white/5">
               <p className="text-xs text-white/40 uppercase tracking-wider font-bold mb-2">Plano Atual</p>
-              <p className="text-sm font-bold text-white mb-1">Free</p>
+              <p className="text-sm font-bold text-white mb-1">Grátis</p>
               <p className="text-xs text-white/60 mb-3">1 projeto ativo</p>
               <Link 
                 to="/pricing"
                 className="block w-full py-2 text-center text-xs font-bold bg-white text-black rounded-lg hover:bg-white/90 transition-colors"
               >
-                Upgrade
+                Melhorar Plano
               </Link>
             </div>
           </div>

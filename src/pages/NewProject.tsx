@@ -158,7 +158,7 @@ export default function NewProject() {
                     autoFocus
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder="Ex: Meu Portfólio, Inamável App..."
+                    placeholder="Ex: Meu Portfólio, Inabalável App..."
                     className="w-full bg-white/5 border-b-2 border-white/10 py-6 text-3xl font-bold outline-none focus:border-purple-500 transition-all"
                   />
                 </div>

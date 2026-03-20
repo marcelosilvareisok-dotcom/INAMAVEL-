@@ -49,7 +49,7 @@ export default function Pricing() {
       <div className="text-center max-w-2xl mx-auto">
         <h1 className="text-4xl md:text-6xl font-black tracking-tighter mb-4">ABASTEÇA SUA <span className="text-purple-500">CRIATIVIDADE</span>.</h1>
         <p className="text-xl text-white/60">
-          Inamável💔 usa um sistema de moedas justo: pague apenas pelo que usar. 
+          Inabalável💔 usa um sistema de moedas justo: pague apenas pelo que usar. 
           Sem assinaturas mensais chatas.
         </p>
       </div>

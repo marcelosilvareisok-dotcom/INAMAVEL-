@@ -1,22 +1,28 @@
 import { GoogleGenAI, Type } from "@google/genai";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
+const apiKey = process.env.GEMINI_API_KEY;
+
+if (!apiKey) {
+  console.error("ERRO: GEMINI_API_KEY não encontrada no ambiente.");
+}
+
+const ai = new GoogleGenAI({ apiKey: apiKey || "" });
 
 export async function generateProjectContent(name: string, type: string, objective: string) {
   const prompt = `
-    Crie um conteúdo estruturado para um projeto chamado "${name}".
+    Crie um conteúdo estruturado EM PORTUGUÊS DO BRASIL para um projeto chamado "${name}".
     Tipo: ${type}
     Objetivo: ${objective}
     
     O conteúdo deve ser um objeto JSON contendo:
-    - title: Título impactante
-    - description: Descrição curta e persuasiva
+    - title: Título impactante em português
+    - description: Descrição curta e persuasiva em português
     - sections: Um array de seções, cada uma com:
       - id: Identificador único
       - type: 'hero' | 'features' | 'about' | 'cta' | 'contact'
-      - title: Título da seção
-      - content: Texto principal da seção
-      - items: (opcional) Array de strings para listas ou cards
+      - title: Título da seção em português
+      - content: Texto principal da seção em português
+      - items: (opcional) Array de strings para listas ou cards em português
     - theme: Cores sugeridas (primary, secondary, accent)
     
     Retorne APENAS o JSON válido.

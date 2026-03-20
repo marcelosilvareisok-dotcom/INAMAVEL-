@@ -254,7 +254,7 @@ export default function Editor() {
                 </section>
               ))}
               <footer className="p-8 text-center text-xs text-black/40 border-t border-black/5">
-                Feito com Inamável💔
+                Feito com Inabalável💔
               </footer>
             </div>
           </div>
@@ -287,7 +287,7 @@ export default function Editor() {
               </p>
               
               <div className="p-4 bg-white/5 rounded-2xl border border-white/10 flex items-center justify-between mb-8">
-                <code className="text-purple-400 font-bold truncate">inamavel.app/p/{project.slug}</code>
+                <code className="text-purple-400 font-bold truncate">inabalavel.app/p/{project.slug}</code>
                 <button className="p-2 hover:bg-white/10 rounded-lg transition-colors text-white/40 hover:text-white">
                   <Save size={18} />
                 </button>

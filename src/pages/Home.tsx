@@ -49,7 +49,7 @@ export default function Home() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="text-xl text-white/60 max-w-2xl mx-auto mb-12 leading-relaxed"
           >
-            Inamável💔 é o construtor de sites com IA para quem foi ignorado. 
+            Inabalável💔 é o construtor de sites com IA para quem foi ignorado. 
             Transforme sua visão em realidade sem escrever uma única linha de código.
           </motion.p>
 
@@ -129,7 +129,7 @@ export default function Home() {
               DO <span className="text-red-500 italic">NINGUÉM LIGA</span> AO <span className="text-purple-500 italic">TODO MUNDO USA</span>.
             </h2>
             <p className="text-xl text-white/60 mb-8 leading-relaxed">
-              Inspirado no conceito de "Unlovable", criamos uma ferramenta para os subestimados. 
+              Inspirado na força de quem já foi rejeitado, criamos uma ferramenta para os subestimados. 
               Pessoas comuns agora podem criar coisas extraordinárias.
             </p>
             <div className="space-y-4">
@@ -184,10 +184,10 @@ export default function Home() {
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
           <div className="flex items-center gap-2">
             <Heart size={20} className="text-red-500 fill-red-500" />
-            <span className="font-bold">Inamável💔</span>
+            <span className="font-bold">Inabalável💔</span>
           </div>
           <p className="text-white/40 text-sm">
-            © 2026 Inamável. Criado por Marcelo da Silva Reis.
+            © 2026 Inabalável. Criado por Marcelo da Silva Reis.
           </p>
           <div className="flex gap-6">
             <a href="#" className="text-white/40 hover:text-white transition-colors">Twitter</a>

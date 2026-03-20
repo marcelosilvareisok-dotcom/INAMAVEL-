@@ -14,6 +14,18 @@ export default function Login() {
   const [error, setError] = React.useState('');
   const navigate = useNavigate();
 
+  const translateError = (message: string) => {
+    if (message.includes('auth/invalid-credential')) return 'Email ou senha incorretos.';
+    if (message.includes('auth/user-not-found')) return 'Usuário não encontrado.';
+    if (message.includes('auth/wrong-password')) return 'Senha incorreta.';
+    if (message.includes('auth/email-already-in-use')) return 'Este email já está em uso.';
+    if (message.includes('auth/weak-password')) return 'A senha deve ter pelo menos 6 caracteres.';
+    if (message.includes('auth/invalid-email')) return 'Email inválido.';
+    if (message.includes('auth/popup-closed-by-user')) return 'O login foi cancelado.';
+    if (message.includes('auth/unauthorized-domain')) return 'Domínio não autorizado no Firebase.';
+    return 'Ocorreu um erro. Tente novamente.';
+  };
+
   const handleAuthSuccess = async (user: any) => {
     const userRef = doc(db, 'users', user.uid);
     const userDoc = await getDoc(userRef);
@@ -24,7 +36,7 @@ export default function Login() {
         email: user.email,
         displayName: user.displayName || email.split('@')[0],
         photoURL: user.photoURL || '',
-        coins: 10, // Welcome bonus
+        coins: 100, // Welcome bonus increased
         createdAt: serverTimestamp(),
         role: 'user'
       });
@@ -39,7 +51,7 @@ export default function Login() {
       const result = await signInWithPopup(auth, googleProvider);
       await handleAuthSuccess(result.user);
     } catch (err: any) {
-      setError(err.message);
+      setError(translateError(err.message));
     } finally {
       setLoading(false);
     }
@@ -58,7 +70,7 @@ export default function Login() {
         await handleAuthSuccess(result.user);
       }
     } catch (err: any) {
-      setError(err.message);
+      setError(translateError(err.message));
     } finally {
       setLoading(false);
     }

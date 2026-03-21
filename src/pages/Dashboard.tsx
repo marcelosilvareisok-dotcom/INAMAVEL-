@@ -284,6 +284,19 @@ export default function Dashboard() {
                         {new Date(project.updatedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                       </div>
                       <div className="flex items-center gap-2">
+                        {project.status !== 'published' && (
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              // TODO: Implement publish logic
+                              console.log("Publicar projeto:", project.id);
+                            }}
+                            className="text-white/20 hover:text-green-400 transition-colors"
+                            title="Publicar"
+                          >
+                            <Globe size={14} />
+                          </button>
+                        )}
                         {project.status === 'published' && (
                           <button 
                             onClick={(e) => {

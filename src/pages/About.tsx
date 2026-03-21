@@ -29,9 +29,10 @@ export default function About() {
         <div className="relative">
           <div className="aspect-square rounded-[40px] overflow-hidden border-2 border-purple-500/30 p-2">
             <img 
-              src="https://api.dicebear.com/7.x/avataaars/svg?seed=Marcelo" 
+              src="https://ais-dev-upcy5jsqo44weybj5jsy6x-23870596290.us-west2.run.app/ceo-photo.jpg" 
               alt="Marcelo da Silva Reis" 
               className="w-full h-full object-cover rounded-[32px] bg-gradient-to-br from-purple-600 to-red-600"
+              referrerPolicy="no-referrer"
             />
           </div>
           <div className="absolute -bottom-6 -right-6 p-6 bg-white text-black rounded-3xl shadow-2xl shadow-purple-500/20">

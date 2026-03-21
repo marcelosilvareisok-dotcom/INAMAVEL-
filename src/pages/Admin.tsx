@@ -2,7 +2,7 @@ import React from 'react';
 import { collection, getDocs, doc, updateDoc, query, orderBy } from 'firebase/firestore';
 import { db } from '../firebase';
 import { motion } from 'motion/react';
-import { Users, Coins, Search, ShieldCheck, ArrowUpRight, RefreshCw } from 'lucide-react';
+import { Users, Coins, Search, ShieldCheck, ArrowUpRight, ArrowDownRight, RefreshCw } from 'lucide-react';
 
 interface UserData {
   uid: string;
@@ -39,15 +39,16 @@ export default function Admin() {
     fetchUsers();
   }, []);
 
-  const handleAddCoins = async (userId: string, currentCoins: number) => {
+  const handleUpdateCoins = async (userId: string, currentCoins: number, amount: number) => {
+    const newAmount = Math.max(0, currentCoins + amount);
     setUpdating(userId);
     try {
       const userRef = doc(db, 'users', userId);
       await updateDoc(userRef, {
-        coins: currentCoins + 10
+        coins: newAmount
       });
       // Update local state
-      setUsers(users.map(u => u.uid === userId ? { ...u, coins: u.coins + 10 } : u));
+      setUsers(users.map(u => u.uid === userId ? { ...u, coins: newAmount } : u));
     } catch (error) {
       console.error("Error updating coins:", error);
     } finally {
@@ -173,14 +174,24 @@ export default function Admin() {
                       </span>
                     </td>
                     <td className="px-8 py-6 text-right">
-                      <button 
-                        onClick={() => handleAddCoins(user.uid, user.coins)}
-                        disabled={updating === user.uid}
-                        className="p-2 hover:bg-yellow-500/10 text-yellow-500 rounded-lg transition-colors disabled:opacity-50"
-                        title="Adicionar 10 moedas"
-                      >
-                        <ArrowUpRight size={20} />
-                      </button>
+                      <div className="flex items-center justify-end gap-2">
+                        <button 
+                          onClick={() => handleUpdateCoins(user.uid, user.coins, -10)}
+                          disabled={updating === user.uid || user.coins < 10}
+                          className="p-2 hover:bg-red-500/10 text-red-500 rounded-lg transition-colors disabled:opacity-20"
+                          title="Remover 10 moedas"
+                        >
+                          <ArrowDownRight size={20} />
+                        </button>
+                        <button 
+                          onClick={() => handleUpdateCoins(user.uid, user.coins, 10)}
+                          disabled={updating === user.uid}
+                          className="p-2 hover:bg-yellow-500/10 text-yellow-500 rounded-lg transition-colors disabled:opacity-50"
+                          title="Adicionar 10 moedas"
+                        >
+                          <ArrowUpRight size={20} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))

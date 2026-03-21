@@ -1,5 +1,6 @@
 import express from "express";
 import path from "path";
+import fs from 'fs';
 import { MercadoPagoConfig, Preference } from 'mercadopago';
 import dotenv from 'dotenv';
 
@@ -75,6 +76,21 @@ app.post("/api/webhook", async (req, res) => {
   // but this is where the real logic should be.
   console.log('Webhook received:', req.body);
   res.sendStatus(200);
+});
+
+app.post("/api/update-icon", (req, res) => {
+  const { iconUrl } = req.body;
+  const manifestPath = path.join(process.cwd(), 'public', 'manifest.json');
+  try {
+    const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
+    manifest.icons[0].src = iconUrl;
+    manifest.icons[1].src = iconUrl;
+    fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error updating manifest:', error);
+    res.status(500).json({ error: 'Failed to update manifest' });
+  }
 });
 
 const startServer = async () => {

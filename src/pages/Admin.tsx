@@ -18,6 +18,7 @@ export default function Admin() {
   const [searchTerm, setSearchTerm] = React.useState('');
   const [updating, setUpdating] = React.useState<string | null>(null);
   const [freeMode, setFreeMode] = React.useState(false);
+  const [iconUrl, setIconUrl] = React.useState('');
   const [updatingSettings, setUpdatingSettings] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [success, setSuccess] = React.useState<string | null>(null);
@@ -27,6 +28,7 @@ export default function Admin() {
     const unsubscribe = onSnapshot(docRef, (docSnap) => {
       if (docSnap.exists()) {
         setFreeMode(docSnap.data().freeMode || false);
+        setIconUrl(docSnap.data().iconUrl || 'https://api.dicebear.com/7.x/avataaars/svg?seed=Inabalavel');
       }
     }, (error) => {
       console.error("Error listening to settings:", error);
@@ -77,6 +79,37 @@ export default function Admin() {
     } catch (error: any) {
       console.error("Error updating settings:", error);
       setError(error.message || "Erro ao atualizar configurações. Verifique suas permissões.");
+    } finally {
+      setUpdatingSettings(false);
+    }
+  };
+
+  const updateIconUrl = async () => {
+    setUpdatingSettings(true);
+    setError(null);
+    setSuccess(null);
+    try {
+      // Update Firestore
+      const docRef = doc(db, 'settings', 'global');
+      await setDoc(docRef, {
+        iconUrl: iconUrl,
+        updatedAt: new Date().toISOString()
+      }, { merge: true });
+
+      // Update manifest.json via API
+      const response = await fetch('/api/update-icon', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ iconUrl })
+      });
+      
+      if (!response.ok) throw new Error('Falha ao atualizar o ícone no servidor.');
+
+      setSuccess("Ícone atualizado com sucesso!");
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (error: any) {
+      console.error("Error updating icon:", error);
+      setError(error.message || "Erro ao atualizar ícone.");
     } finally {
       setUpdatingSettings(false);
     }
@@ -176,6 +209,28 @@ export default function Admin() {
             </div>
           )}
         </button>
+        
+        <div className="p-6 bg-white/5 border border-white/10 rounded-[32px] space-y-4">
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 bg-blue-500/20 rounded-xl flex items-center justify-center">
+              <img src={iconUrl} alt="Icon" className="w-6 h-6 rounded-full" />
+            </div>
+            <span className="text-sm font-medium text-white/40 uppercase tracking-widest">URL do Ícone</span>
+          </div>
+          <input 
+            type="text"
+            value={iconUrl}
+            onChange={(e) => setIconUrl(e.target.value)}
+            className="w-full bg-white/5 border border-white/10 rounded-xl p-2 text-sm"
+          />
+          <button 
+            onClick={updateIconUrl}
+            disabled={updatingSettings}
+            className="w-full py-2 bg-blue-500 text-white rounded-xl font-bold hover:bg-blue-600 transition-colors"
+          >
+            Atualizar Ícone
+          </button>
+        </div>
       </div>
 
       {/* Search */}

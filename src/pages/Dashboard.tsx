@@ -36,18 +36,15 @@ export default function Dashboard() {
   const [freeMode, setFreeMode] = React.useState(false);
 
   React.useEffect(() => {
-    const fetchSettings = async () => {
-      try {
-        const docRef = doc(db, 'settings', 'global');
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          setFreeMode(docSnap.data().freeMode || false);
-        }
-      } catch (error) {
-        console.error("Error fetching settings:", error);
+    const docRef = doc(db, 'settings', 'global');
+    const unsubscribe = onSnapshot(docRef, (docSnap) => {
+      if (docSnap.exists()) {
+        setFreeMode(docSnap.data().freeMode || false);
       }
-    };
-    fetchSettings();
+    }, (error) => {
+      console.error("Error listening to settings:", error);
+    });
+    return () => unsubscribe();
   }, []);
 
   React.useEffect(() => {

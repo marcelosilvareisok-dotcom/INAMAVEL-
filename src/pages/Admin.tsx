@@ -1,5 +1,5 @@
 import React from 'react';
-import { collection, getDocs, doc, updateDoc, query, orderBy, setDoc, getDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, updateDoc, query, orderBy, setDoc, getDoc, onSnapshot, getDocFromServer } from 'firebase/firestore';
 import { db } from '../firebase';
 import { motion } from 'motion/react';
 import { Users, Coins, Search, ShieldCheck, ArrowUpRight, ArrowDownRight, RefreshCw, Zap, ZapOff } from 'lucide-react';
@@ -19,18 +19,20 @@ export default function Admin() {
   const [updating, setUpdating] = React.useState<string | null>(null);
   const [freeMode, setFreeMode] = React.useState(false);
   const [updatingSettings, setUpdatingSettings] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+  const [success, setSuccess] = React.useState<string | null>(null);
 
-  const fetchSettings = async () => {
-    try {
-      const docRef = doc(db, 'settings', 'global');
-      const docSnap = await getDoc(docRef);
+  React.useEffect(() => {
+    const docRef = doc(db, 'settings', 'global');
+    const unsubscribe = onSnapshot(docRef, (docSnap) => {
       if (docSnap.exists()) {
         setFreeMode(docSnap.data().freeMode || false);
       }
-    } catch (error) {
-      console.error("Error fetching settings:", error);
-    }
-  };
+    }, (error) => {
+      console.error("Error listening to settings:", error);
+    });
+    return () => unsubscribe();
+  }, []);
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -51,20 +53,30 @@ export default function Admin() {
 
   React.useEffect(() => {
     fetchUsers();
-    fetchSettings();
   }, []);
 
   const toggleFreeMode = async () => {
     setUpdatingSettings(true);
+    setError(null);
+    setSuccess(null);
     try {
-      const newMode = !freeMode;
-      await setDoc(doc(db, 'settings', 'global'), {
+      // Get latest state from server before toggling
+      const docRef = doc(db, 'settings', 'global');
+      const docSnap = await getDocFromServer(docRef);
+      const currentMode = docSnap.exists() ? docSnap.data().freeMode : false;
+      const newMode = !currentMode;
+
+      await setDoc(docRef, {
         freeMode: newMode,
         updatedAt: new Date().toISOString()
       }, { merge: true });
+      
       setFreeMode(newMode);
-    } catch (error) {
+      setSuccess(`Modo Grátis ${newMode ? 'ativado' : 'desativado'} com sucesso!`);
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (error: any) {
       console.error("Error updating settings:", error);
+      setError(error.message || "Erro ao atualizar configurações. Verifique suas permissões.");
     } finally {
       setUpdatingSettings(false);
     }
@@ -167,15 +179,29 @@ export default function Admin() {
       </div>
 
       {/* Search */}
-      <div className="relative">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" size={20} />
-        <input 
-          type="text" 
-          placeholder="Buscar por email ou nome..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 focus:outline-none focus:border-purple-500/50 transition-colors"
-        />
+      <div className="space-y-4">
+        {error && (
+          <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-500 text-sm font-bold flex items-center gap-2">
+            <ZapOff size={16} />
+            {error}
+          </div>
+        )}
+        {success && (
+          <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-2xl text-green-500 text-sm font-bold flex items-center gap-2">
+            <ShieldCheck size={16} />
+            {success}
+          </div>
+        )}
+        <div className="relative">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" size={20} />
+          <input 
+            type="text" 
+            placeholder="Buscar por email ou nome..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 focus:outline-none focus:border-purple-500/50 transition-colors"
+          />
+        </div>
       </div>
 
       {/* Users Table */}

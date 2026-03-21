@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { db, auth } from '../firebase';
-import { doc, setDoc, updateDoc, increment, collection, serverTimestamp, getDoc } from 'firebase/firestore';
+import { doc, setDoc, updateDoc, increment, collection, serverTimestamp, getDoc, getDocFromServer } from 'firebase/firestore';
 import { handleFirestoreError, OperationType } from '../utils/firestore-errors';
 import { generateProjectContent } from '../services/gemini';
 import { motion, AnimatePresence } from 'motion/react';
@@ -41,7 +41,7 @@ export default function NewProject() {
       setProgress(20);
       
       const settingsRef = doc(db, 'settings', 'global');
-      const settingsSnap = await getDoc(settingsRef);
+      const settingsSnap = await getDocFromServer(settingsRef);
       const isFreeMode = settingsSnap.exists() && settingsSnap.data().freeMode === true;
 
       const userRef = doc(db, 'users', auth.currentUser.uid);

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { db, auth } from '../firebase';
-import { collection, query, where, onSnapshot, orderBy } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, orderBy, doc, updateDoc, increment, setDoc } from 'firebase/firestore';
 import { Project } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../utils';
@@ -17,7 +17,8 @@ import {
   Zap,
   Trash2,
   Edit3,
-  Heart
+  Heart,
+  Coins
 } from 'lucide-react';
 
 export default function Dashboard() {
@@ -25,6 +26,43 @@ export default function Dashboard() {
   const [loading, setLoading] = React.useState(true);
   const [searchTerm, setSearchTerm] = React.useState('');
   const [lastProject, setLastProject] = React.useState<Project | null>(null);
+  const [showPaymentSuccess, setShowPaymentSuccess] = React.useState<{ coins: number } | null>(null);
+
+  React.useEffect(() => {
+    // Handle payment success from Mercado Pago
+    const urlParams = new URLSearchParams(window.location.search);
+    const paymentStatus = urlParams.get('payment');
+    const coinsStr = urlParams.get('coins');
+
+    if (paymentStatus === 'success' && coinsStr && auth.currentUser) {
+      const coins = parseInt(coinsStr);
+      const updateCoins = async () => {
+        try {
+          const userRef = doc(db, 'users', auth.currentUser!.uid);
+          await updateDoc(userRef, {
+            coins: increment(coins)
+          });
+
+          const transactionId = Math.random().toString(36).substring(7);
+          await setDoc(doc(db, 'transactions', transactionId), {
+            id: transactionId,
+            userId: auth.currentUser!.uid,
+            amount: coins,
+            type: 'purchase',
+            description: `Compra de ${coins} moedas (Mercado Pago)`,
+            createdAt: new Date().toISOString()
+          });
+
+          setShowPaymentSuccess({ coins });
+          // Clear URL params
+          window.history.replaceState({}, document.title, window.location.pathname);
+        } catch (error) {
+          console.error("Erro ao atualizar moedas:", error);
+        }
+      };
+      updateCoins();
+    }
+  }, []);
 
   React.useEffect(() => {
     if (!auth.currentUser) return;
@@ -60,6 +98,41 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-8 pb-20">
+      <AnimatePresence>
+        {showPaymentSuccess && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowPaymentSuccess(null)}
+              className="absolute inset-0 bg-black/80 backdrop-blur-md"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative w-full max-w-sm bg-[#0a0a0a] border border-white/10 rounded-[40px] p-12 text-center"
+            >
+              <div className="w-20 h-20 bg-yellow-500/20 rounded-3xl flex items-center justify-center mx-auto mb-8">
+                <Coins size={40} className="text-yellow-500" />
+              </div>
+              <h2 className="text-3xl font-black tracking-tighter mb-4">RECARGA CONCLUÍDA!</h2>
+              <p className="text-white/60 mb-8">
+                Você recebeu {showPaymentSuccess.coins} moedas extraordinárias via Mercado Pago. 
+                Sua criatividade agora não tem limites.
+              </p>
+              <button 
+                onClick={() => setShowPaymentSuccess(null)}
+                className="w-full py-4 bg-white text-black font-bold rounded-2xl hover:bg-white/90 transition-all"
+              >
+                Continuar Criando
+              </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>

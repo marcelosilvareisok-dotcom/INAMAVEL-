@@ -14,27 +14,29 @@ export default function Pricing() {
     setLoading(amount.toString());
     
     try {
-      // Simulate payment success
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const response = await fetch('/api/create-preference', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: `Pacote de ${coins} moedas - Inabalável💔`,
+          price: amount,
+          quantity: 1,
+          userId: auth.currentUser.uid,
+          coins: coins
+        }),
+      });
+
+      if (!response.ok) throw new Error('Falha ao criar preferência de pagamento');
+
+      const { init_point } = await response.json();
       
-      const userRef = doc(db, 'users', auth.currentUser.uid);
-      await updateDoc(userRef, {
-        coins: increment(coins)
-      });
-
-      const transactionId = Math.random().toString(36).substring(7);
-      await setDoc(doc(db, 'transactions', transactionId), {
-        id: transactionId,
-        userId: auth.currentUser.uid,
-        amount: coins,
-        type: 'purchase',
-        description: `Compra de ${coins} moedas`,
-        createdAt: new Date().toISOString()
-      });
-
-      setShowSuccess({ coins });
+      // Redirect to Mercado Pago Checkout
+      window.location.href = init_point;
     } catch (error) {
       console.error("Erro na compra:", error);
+      alert("Erro ao iniciar o pagamento. Tente novamente.");
     } finally {
       setLoading(null);
     }

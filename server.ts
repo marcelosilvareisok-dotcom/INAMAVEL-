@@ -3,6 +3,7 @@ import path from "path";
 import fs from 'fs';
 import { MercadoPagoConfig, Preference } from 'mercadopago';
 import dotenv from 'dotenv';
+import { Octokit } from "octokit";
 
 dotenv.config();
 
@@ -12,6 +13,54 @@ const PORT = 3000;
 app.use(express.json());
 
 // API Routes
+app.post("/api/publish", async (req, res) => {
+  const { githubToken, repoOwner, repoName, files, commitMessage } = req.body;
+
+  if (!githubToken || !repoOwner || !repoName || !files) {
+    return res.status(400).json({ error: 'Dados incompletos' });
+  }
+
+  try {
+    const octokit = new Octokit({ auth: githubToken });
+
+    // For simplicity, this assumes we are updating files.
+    // In a real scenario, you'd need to handle creating/updating files more robustly.
+    for (const file of files) {
+      try {
+        // Try to get the file to see if it exists
+        const { data: existingFile } = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
+          owner: repoOwner,
+          repo: repoName,
+          path: file.path,
+        });
+
+        await octokit.request('PUT /repos/{owner}/{repo}/contents/{path}', {
+          owner: repoOwner,
+          repo: repoName,
+          path: file.path,
+          message: commitMessage || 'Update from Inabalável',
+          content: Buffer.from(file.content).toString('base64'),
+          sha: (existingFile as any).sha,
+        });
+      } catch (e) {
+        // If file doesn't exist, create it
+        await octokit.request('PUT /repos/{owner}/{repo}/contents/{path}', {
+          owner: repoOwner,
+          repo: repoName,
+          path: file.path,
+          message: commitMessage || 'Create from Inabalável',
+          content: Buffer.from(file.content).toString('base64'),
+        });
+      }
+    }
+
+    res.json({ success: true });
+  } catch (error: any) {
+    console.error('Error publishing to GitHub:', error);
+    res.status(500).json({ error: 'Erro ao publicar no GitHub', details: error.message });
+  }
+});
+
 app.post("/api/create-preference", async (req, res) => {
   try {
     const token = process.env.MERCADO_PAGO_ACCESS_TOKEN;

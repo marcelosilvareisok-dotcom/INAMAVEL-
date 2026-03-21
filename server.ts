@@ -24,6 +24,8 @@ app.post("/api/create-preference", async (req, res) => {
     }
     const { title, price, quantity, userId, coins } = req.body;
 
+    const baseUrl = process.env.APP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
+
     const preference = new Preference(client);
     const result = await preference.create({
       body: {
@@ -37,9 +39,9 @@ app.post("/api/create-preference", async (req, res) => {
           }
         ],
         back_urls: {
-          success: `${process.env.APP_URL || 'http://localhost:3000'}/dashboard?payment=success&coins=${coins}`,
-          failure: `${process.env.APP_URL || 'http://localhost:3000'}/pricing?payment=failure`,
-          pending: `${process.env.APP_URL || 'http://localhost:3000'}/pricing?payment=pending`,
+          success: `${baseUrl}/dashboard?payment=success&coins=${coins}`,
+          failure: `${baseUrl}/pricing?payment=failure`,
+          pending: `${baseUrl}/pricing?payment=pending`,
         },
         auto_return: 'approved',
         external_reference: userId, // Pass userId to identify who bought
@@ -67,21 +69,29 @@ app.post("/api/webhook", async (req, res) => {
   res.sendStatus(200);
 });
 
-// Vite middleware for development
-if (process.env.NODE_ENV !== "production") {
-  const vite = await createViteServer({
-    server: { middlewareMode: true },
-    appType: "spa",
-  });
-  app.use(vite.middlewares);
-} else {
-  const distPath = path.join(process.cwd(), 'dist');
-  app.use(express.static(distPath));
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(distPath, 'index.html'));
-  });
-}
+const startServer = async () => {
+  // Vite middleware for development
+  if (process.env.NODE_ENV !== "production") {
+    const vite = await createViteServer({
+      server: { middlewareMode: true },
+      appType: "spa",
+    });
+    app.use(vite.middlewares);
+  } else {
+    const distPath = path.join(process.cwd(), 'dist');
+    app.use(express.static(distPath));
+    app.get('*', (req, res) => {
+      res.sendFile(path.join(distPath, 'index.html'));
+    });
+  }
 
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
+  if (process.env.NODE_ENV !== "production" || !process.env.VERCEL) {
+    app.listen(PORT, "0.0.0.0", () => {
+      console.log(`Server running on http://localhost:${PORT}`);
+    });
+  }
+};
+
+startServer();
+
+export default app;

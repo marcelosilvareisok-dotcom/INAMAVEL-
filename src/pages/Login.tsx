@@ -24,6 +24,7 @@ export default function Login() {
     if (message.includes('auth/invalid-email')) return 'Email inválido.';
     if (message.includes('auth/popup-closed-by-user')) return 'O login foi cancelado.';
     if (message.includes('auth/unauthorized-domain')) return 'Domínio não autorizado no Firebase.';
+    if (message.includes('auth/operation-not-allowed')) return 'O login por email/senha não está ativado no Firebase Console.';
     return 'Ocorreu um erro. Tente novamente.';
   };
 

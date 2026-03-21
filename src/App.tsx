@@ -17,6 +17,7 @@ import NewProject from './pages/NewProject';
 import Editor from './pages/Editor';
 import Pricing from './pages/Pricing';
 import About from './pages/About';
+import Admin from './pages/Admin';
 
 // Components
 import Layout from './components/Layout';
@@ -143,6 +144,14 @@ export default function App() {
                     }
                   />
                   <Route path="/about" element={<About />} />
+                  <Route 
+                    path="/admin" 
+                    element={
+                      <AuthGuard>
+                        {user?.email === 'marcelodasilvareis30@gmail.com' ? <Admin /> : <Navigate to="/dashboard" replace />}
+                      </AuthGuard>
+                    } 
+                  />
                   <Route path="*" element={<Navigate to="/dashboard" replace />} />
                 </Routes>
               </Layout>

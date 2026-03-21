@@ -8,7 +8,8 @@ import {
   LogOut, 
   Heart,
   Menu,
-  X
+  X,
+  ShieldCheck
 } from 'lucide-react';
 import { auth } from '../firebase';
 import { signOut } from 'firebase/auth';
@@ -31,6 +32,10 @@ export default function Layout({ children, user, coins }: LayoutProps) {
     { name: 'Comprar Moedas', path: '/pricing', icon: Coins },
     { name: 'Sobre o CEO', path: '/about', icon: User },
   ];
+
+  if (user?.email === 'marcelodasilvareis30@gmail.com') {
+    navItems.push({ name: 'Admin', path: '/admin', icon: ShieldCheck });
+  }
 
   const handleLogout = () => signOut(auth);
 

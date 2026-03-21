@@ -1,0 +1,194 @@
+import React from 'react';
+import { collection, getDocs, doc, updateDoc, query, orderBy } from 'firebase/firestore';
+import { db } from '../firebase';
+import { motion } from 'motion/react';
+import { Users, Coins, Search, ShieldCheck, ArrowUpRight, RefreshCw } from 'lucide-react';
+
+interface UserData {
+  uid: string;
+  email: string;
+  coins: number;
+  role: string;
+  displayName?: string;
+}
+
+export default function Admin() {
+  const [users, setUsers] = React.useState<UserData[]>([]);
+  const [loading, setLoading] = React.useState(true);
+  const [searchTerm, setSearchTerm] = React.useState('');
+  const [updating, setUpdating] = React.useState<string | null>(null);
+
+  const fetchUsers = async () => {
+    setLoading(true);
+    try {
+      const q = query(collection(db, 'users'), orderBy('coins', 'desc'));
+      const querySnapshot = await getDocs(q);
+      const usersList: UserData[] = [];
+      querySnapshot.forEach((doc) => {
+        usersList.push(doc.data() as UserData);
+      });
+      setUsers(usersList);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  React.useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const handleAddCoins = async (userId: string, currentCoins: number) => {
+    setUpdating(userId);
+    try {
+      const userRef = doc(db, 'users', userId);
+      await updateDoc(userRef, {
+        coins: currentCoins + 10
+      });
+      // Update local state
+      setUsers(users.map(u => u.uid === userId ? { ...u, coins: u.coins + 10 } : u));
+    } catch (error) {
+      console.error("Error updating coins:", error);
+    } finally {
+      setUpdating(null);
+    }
+  };
+
+  const filteredUsers = users.filter(user => 
+    user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (user.displayName && user.displayName.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
+
+  return (
+    <div className="space-y-8 pb-20">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-4xl font-black tracking-tighter flex items-center gap-3">
+            <ShieldCheck className="text-purple-500" size={32} />
+            PAINEL <span className="text-purple-500">ADMIN</span>
+          </h1>
+          <p className="text-white/60">Gerencie os usuários e recursos da plataforma.</p>
+        </div>
+        <button 
+          onClick={fetchUsers}
+          className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-colors"
+        >
+          <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
+          Atualizar
+        </button>
+      </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="p-6 bg-white/5 border border-white/10 rounded-[32px]">
+          <div className="flex items-center gap-4 mb-2">
+            <div className="w-10 h-10 bg-purple-500/20 rounded-xl flex items-center justify-center">
+              <Users size={20} className="text-purple-500" />
+            </div>
+            <span className="text-sm font-medium text-white/40 uppercase tracking-widest">Total Usuários</span>
+          </div>
+          <p className="text-3xl font-black">{users.length}</p>
+        </div>
+        <div className="p-6 bg-white/5 border border-white/10 rounded-[32px]">
+          <div className="flex items-center gap-4 mb-2">
+            <div className="w-10 h-10 bg-yellow-500/20 rounded-xl flex items-center justify-center">
+              <Coins size={20} className="text-yellow-500" />
+            </div>
+            <span className="text-sm font-medium text-white/40 uppercase tracking-widest">Moedas em Circulação</span>
+          </div>
+          <p className="text-3xl font-black">{users.reduce((acc, u) => acc + u.coins, 0)}</p>
+        </div>
+        <div className="p-6 bg-white/5 border border-white/10 rounded-[32px]">
+          <div className="flex items-center gap-4 mb-2">
+            <div className="w-10 h-10 bg-green-500/20 rounded-xl flex items-center justify-center">
+              <ShieldCheck size={20} className="text-green-500" />
+            </div>
+            <span className="text-sm font-medium text-white/40 uppercase tracking-widest">Status do Sistema</span>
+          </div>
+          <p className="text-3xl font-black text-green-500">ATIVO</p>
+        </div>
+      </div>
+
+      {/* Search */}
+      <div className="relative">
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" size={20} />
+        <input 
+          type="text" 
+          placeholder="Buscar por email ou nome..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 focus:outline-none focus:border-purple-500/50 transition-colors"
+        />
+      </div>
+
+      {/* Users Table */}
+      <div className="bg-white/5 border border-white/10 rounded-[40px] overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left">
+            <thead>
+              <tr className="border-b border-white/5">
+                <th className="px-8 py-6 text-xs font-black uppercase tracking-widest text-white/40">Usuário</th>
+                <th className="px-8 py-6 text-xs font-black uppercase tracking-widest text-white/40">Moedas</th>
+                <th className="px-8 py-6 text-xs font-black uppercase tracking-widest text-white/40">Cargo</th>
+                <th className="px-8 py-6 text-xs font-black uppercase tracking-widest text-white/40 text-right">Ações</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/5">
+              {loading ? (
+                <tr>
+                  <td colSpan={4} className="px-8 py-12 text-center text-white/40">Carregando usuários...</td>
+                </tr>
+              ) : filteredUsers.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="px-8 py-12 text-center text-white/40">Nenhum usuário encontrado.</td>
+                </tr>
+              ) : (
+                filteredUsers.map((user) => (
+                  <tr key={user.uid} className="hover:bg-white/[0.02] transition-colors group">
+                    <td className="px-8 py-6">
+                      <div className="flex items-center gap-4">
+                        <img 
+                          src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.email}`} 
+                          alt="Avatar" 
+                          className="w-10 h-10 rounded-full border border-white/10"
+                        />
+                        <div>
+                          <p className="font-bold text-white">{user.displayName || 'Sem Nome'}</p>
+                          <p className="text-xs text-white/40">{user.email}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-8 py-6">
+                      <div className="flex items-center gap-2">
+                        <Coins size={14} className="text-yellow-500" />
+                        <span className="font-bold">{user.coins}</span>
+                      </div>
+                    </td>
+                    <td className="px-8 py-6">
+                      <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
+                        user.role === 'admin' ? 'bg-purple-500/20 text-purple-400 border border-purple-500/20' : 'bg-white/5 text-white/40 border border-white/10'
+                      }`}>
+                        {user.role}
+                      </span>
+                    </td>
+                    <td className="px-8 py-6 text-right">
+                      <button 
+                        onClick={() => handleAddCoins(user.uid, user.coins)}
+                        disabled={updating === user.uid}
+                        className="p-2 hover:bg-yellow-500/10 text-yellow-500 rounded-lg transition-colors disabled:opacity-50"
+                        title="Adicionar 10 moedas"
+                      >
+                        <ArrowUpRight size={20} />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}

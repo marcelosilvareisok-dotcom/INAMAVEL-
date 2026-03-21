@@ -166,7 +166,7 @@ export default function NewProject() {
 
               <div className="space-y-2">
                 <label className="text-sm font-bold text-white/60 uppercase tracking-widest">Tipo de Projeto</label>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {projectTypes.map((t) => (
                     <button
                       key={t.id}
@@ -203,9 +203,9 @@ export default function NewProject() {
             </div>
           )}
 
-          <div className="flex items-center justify-between gap-4 p-6 bg-white/5 rounded-3xl border border-white/10">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-yellow-500/10 flex items-center justify-center">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-6 bg-white/5 rounded-3xl border border-white/10">
+            <div className="flex items-center gap-3 w-full sm:w-auto">
+              <div className="w-10 h-10 rounded-xl bg-yellow-500/10 flex items-center justify-center shrink-0">
                 <Coins size={20} className="text-yellow-500" />
               </div>
               <div>
@@ -216,7 +216,7 @@ export default function NewProject() {
             <button
               disabled={!name || !objective || loading}
               onClick={handleGenerate}
-              className="px-10 py-4 bg-gradient-to-r from-purple-500 to-red-500 text-white font-bold rounded-2xl hover:scale-105 transition-all flex items-center gap-2 group disabled:opacity-50"
+              className="w-full sm:w-auto px-10 py-4 bg-gradient-to-r from-purple-500 to-red-500 text-white font-bold rounded-2xl hover:scale-105 transition-all flex items-center justify-center gap-2 group disabled:opacity-50"
             >
               Gerar com IA <Sparkles size={20} className="group-hover:rotate-12 transition-transform" />
             </button>

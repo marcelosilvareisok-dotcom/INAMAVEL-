@@ -58,7 +58,7 @@ export default function Home() {
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             className="relative"
           >
-            <h1 className="text-[12vw] md:text-[14vw] font-black tracking-tighter leading-[0.82] uppercase mb-8">
+            <h1 className="text-[15vw] md:text-[12vw] lg:text-[10vw] font-black tracking-tighter leading-[0.82] uppercase mb-8">
               CRIE O <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 via-red-500 to-purple-500 bg-[length:200%_auto] animate-gradient">EXTRAORDINÁRIO</span>
             </h1>
@@ -78,7 +78,7 @@ export default function Home() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-lg md:text-2xl text-white/40 max-w-2xl mx-auto mb-16 leading-tight font-medium"
+            className="text-lg md:text-2xl text-white/40 max-w-2xl mx-auto mb-16 leading-tight font-medium px-4"
           >
             Inabalável💔 é a plataforma definitiva para transformar sua dor em poder digital. 
             Crie sites, apps e sistemas complexos com a velocidade do pensamento.
@@ -88,20 +88,20 @@ export default function Home() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.3 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-6"
+            className="flex flex-col sm:flex-row items-center justify-center gap-6 w-full px-4"
           >
             <Link
               to="/login"
-              className="group relative px-12 py-6 bg-white text-black font-black rounded-[32px] overflow-hidden transition-all hover:scale-105 active:scale-95 text-lg uppercase tracking-tighter"
+              className="group relative w-full sm:w-auto px-12 py-6 bg-white text-black font-black rounded-[32px] overflow-hidden transition-all hover:scale-105 active:scale-95 text-lg uppercase tracking-tighter"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-red-500/20 translate-x-full group-hover:translate-x-0 transition-transform duration-500" />
-              <span className="relative flex items-center gap-3">
+              <span className="relative flex items-center justify-center gap-3">
                 Começar Agora <ArrowRight size={24} />
               </span>
             </Link>
             
             {freeMode && (
-              <div className="flex items-center gap-3 px-8 py-6 bg-purple-500/10 border border-purple-500/20 rounded-[32px] text-purple-400 font-black uppercase tracking-widest text-xs animate-pulse">
+              <div className="flex items-center justify-center w-full sm:w-auto gap-3 px-8 py-6 bg-purple-500/10 border border-purple-500/20 rounded-[32px] text-purple-400 font-black uppercase tracking-widest text-xs animate-pulse">
                 <Zap size={20} />
                 Uso Ilimitado Ativo
               </div>
@@ -113,7 +113,7 @@ export default function Home() {
         <motion.div 
           animate={{ y: [0, 10, 0] }}
           transition={{ duration: 2, repeat: Infinity }}
-          className="absolute bottom-10 left-1/2 -translate-x-1/2 text-white/20"
+          className="absolute bottom-10 left-1/2 -translate-x-1/2 text-white/20 hidden md:block"
         >
           <div className="w-px h-12 bg-gradient-to-b from-white/20 to-transparent mx-auto" />
         </motion.div>
@@ -127,7 +127,7 @@ export default function Home() {
             { label: "Tempo de Geração", value: "3.2s", icon: Zap },
             { label: "Taxa de Sucesso", value: "99.9%", icon: ShieldCheck },
           ].map((stat, i) => (
-            <div key={i} className="p-12 border-r border-white/5 last:border-r-0 flex flex-col items-center text-center group hover:bg-white/5 transition-colors">
+            <div key={i} className="p-12 border-b md:border-b-0 md:border-r border-white/5 last:border-b-0 md:last:border-r-0 flex flex-col items-center text-center group hover:bg-white/5 transition-colors">
               <stat.icon size={32} className="text-purple-500 mb-6 group-hover:scale-110 transition-transform" />
               <p className="text-6xl font-black tracking-tighter mb-2">{stat.value}</p>
               <p className="text-xs font-black uppercase tracking-[0.3em] text-white/40">{stat.label}</p>

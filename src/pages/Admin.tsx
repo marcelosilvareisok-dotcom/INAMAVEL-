@@ -222,7 +222,7 @@ export default function Admin() {
           )}
         </button>
         
-        <div className="p-6 bg-white/5 border border-white/10 rounded-[32px] space-y-4">
+        <div className="p-6 bg-white/5 border border-white/10 rounded-[32px] space-y-4 md:col-span-4">
           <div className="flex items-center gap-4">
             <div className="w-10 h-10 bg-blue-500/20 rounded-xl flex items-center justify-center">
               <img src={iconUrl} alt="Icon" className="w-6 h-6 rounded-full" />
@@ -246,7 +246,7 @@ export default function Admin() {
           {iconHistory.length > 0 && (
             <div className="pt-4 border-t border-white/10">
               <span className="text-xs font-medium text-white/40 uppercase tracking-widest mb-2 block">Histórico</span>
-              <div className="grid grid-cols-5 gap-2">
+              <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-2">
                 {iconHistory.map((url, index) => (
                   <button 
                     key={index}

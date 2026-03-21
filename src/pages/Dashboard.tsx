@@ -167,9 +167,9 @@ export default function Dashboard() {
 
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pt-8 border-t border-white/5">
-        <div className="flex items-center gap-6">
+        <div className="flex flex-wrap items-center gap-4 md:gap-6">
           <div>
-            <h1 className="text-5xl font-black tracking-tighter uppercase leading-none">MEUS PROJETOS</h1>
+            <h1 className="text-4xl sm:text-5xl font-black tracking-tighter uppercase leading-none">MEUS PROJETOS</h1>
             <p className="text-white/40 font-medium mt-2">Gerencie suas criações extraordinárias.</p>
           </div>
           {freeMode && (
@@ -188,19 +188,19 @@ export default function Dashboard() {
             <span className="text-[10px] font-black uppercase tracking-widest text-white/60">Suporte Direto</span>
           </a>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           {lastProject && (
             <Link
               to={`/editor/${lastProject.id}`}
               className="hidden sm:flex items-center gap-2 px-4 py-3 bg-white/5 border border-white/10 text-white font-bold rounded-xl hover:bg-white/10 transition-all active:scale-95"
             >
               <Clock size={18} className="text-purple-400" />
-              Continuar: {lastProject.name}
+              <span className="truncate max-w-[150px]">Continuar: {lastProject.name}</span>
             </Link>
           )}
           <Link
             to="/new"
-            className="flex items-center justify-center gap-2 px-6 py-3 bg-white text-black font-bold rounded-xl hover:bg-white/90 transition-all shadow-lg shadow-white/5 active:scale-95"
+            className="flex items-center justify-center gap-2 px-6 py-3 bg-white text-black font-bold rounded-xl hover:bg-white/90 transition-all shadow-lg shadow-white/5 active:scale-95 w-full sm:w-auto"
           >
             <Plus size={20} />
             Novo Projeto

@@ -21,7 +21,9 @@ import {
   Heart,
   Coins,
   Sparkles,
-  ZapOff
+  ZapOff,
+  MessageCircle,
+  HelpCircle
 } from 'lucide-react';
 import PixDonation from '../components/PixDonation';
 
@@ -179,6 +181,15 @@ export default function Dashboard() {
               <span className="text-[10px] font-black uppercase tracking-widest text-purple-400">MODO GRÁTIS ATIVO</span>
             </div>
           )}
+          <a 
+            href="https://wa.me/5594991233751" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="hidden md:flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-full hover:bg-white/10 transition-all group"
+          >
+            <MessageCircle size={14} className="text-green-500 group-hover:scale-110 transition-transform" />
+            <span className="text-[10px] font-black uppercase tracking-widest text-white/60">Suporte Direto</span>
+          </a>
         </div>
         <div className="flex items-center gap-3">
           {lastProject && (

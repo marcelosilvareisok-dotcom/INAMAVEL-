@@ -316,6 +316,23 @@ export default function Home() {
                   <li><a href="#" className="hover:text-purple-500 transition-colors">Twitter</a></li>
                 </ul>
               </div>
+              <div className="space-y-6">
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/20">Contato</p>
+                <ul className="space-y-4 font-bold text-sm">
+                  <li>
+                    <a 
+                      href="https://wa.me/5594991233751" 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="hover:text-green-500 transition-colors flex items-center gap-2"
+                    >
+                      WhatsApp
+                    </a>
+                  </li>
+                  <li className="text-white/40">(94) 99123-3751</li>
+                  <li><a href="mailto:contato@inabalavel.com" className="hover:text-purple-500 transition-colors">Email</a></li>
+                </ul>
+              </div>
             </div>
           </div>
           

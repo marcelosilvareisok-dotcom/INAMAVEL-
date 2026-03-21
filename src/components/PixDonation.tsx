@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Heart, Copy, Check, Smartphone, Sparkles, Zap } from 'lucide-react';
+import { Heart, Copy, Check, Smartphone, Sparkles, Zap, ShieldCheck, MessageCircle } from 'lucide-react';
 
 export default function PixDonation() {
   const [copied, setCopied] = React.useState(false);
@@ -44,7 +44,7 @@ export default function PixDonation() {
               Juntos, transformamos o impossível em realidade.
             </p>
 
-            <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
+            <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 mb-8">
               <div className="flex items-center gap-2 text-yellow-500 font-bold">
                 <Zap size={18} />
                 <span>Processamento Instantâneo</span>
@@ -54,7 +54,25 @@ export default function PixDonation() {
                 <Heart size={18} />
                 <span>Gratidão Eterna</span>
               </div>
+              <div className="w-1 h-1 rounded-full bg-white/20"></div>
+              <div className="flex items-center gap-2 text-green-400 font-bold">
+                <ShieldCheck size={18} />
+                <span>Pagamento Seguro</span>
+              </div>
             </div>
+
+            <a 
+              href="https://wa.me/5594991233751" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-3 px-6 py-3 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-all group/contact"
+            >
+              <MessageCircle size={20} className="text-green-500 group-hover/contact:scale-110 transition-transform" />
+              <div className="text-left">
+                <p className="text-[10px] font-black uppercase tracking-widest text-white/40">Suporte Direto</p>
+                <p className="text-sm font-bold">Falar com Marcelo</p>
+              </div>
+            </a>
           </div>
 
           {/* Right Side: Pix Card */}

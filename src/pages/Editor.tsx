@@ -6,6 +6,7 @@ import { handleFirestoreError, OperationType } from '../utils/firestore-errors';
 import { generateProjectContent } from '../services/gemini';
 import { Project } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
+import MonacoEditor from '@monaco-editor/react';
 import Logo from '../components/Logo';
 import PublishModal from '../components/PublishModal';
 import { 
@@ -303,16 +304,24 @@ export default function Editor() {
               <div className="space-y-4 h-full flex flex-col">
                 <p className="text-xs font-bold text-white/40 uppercase tracking-widest">Código Fonte</p>
                 <div className="flex-1 bg-black/50 border border-white/10 rounded-2xl overflow-hidden relative">
-                  <textarea 
+                  <MonacoEditor 
+                    height="100%"
+                    language="html"
+                    theme="vs-dark"
                     value={content.html || ""}
-                    onChange={(e) => {
-                      const newHtml = e.target.value;
+                    onChange={(value) => {
+                      const newHtml = value || "";
                       setProject(prev => prev ? {
                         ...prev,
                         content: JSON.stringify({ ...content, html: newHtml })
                       } : null);
                     }}
-                    className="absolute inset-0 w-full h-full bg-transparent text-green-400 font-mono text-[10px] p-4 resize-none focus:outline-none"
+                    options={{
+                      fontSize: 12,
+                      minimap: { enabled: false },
+                      scrollBeyondLastLine: false,
+                      padding: { top: 16, bottom: 16 }
+                    }}
                   />
                 </div>
               </div>

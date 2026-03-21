@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Heart, Copy, Check, Smartphone, Sparkles, Zap, ShieldCheck, MessageCircle } from 'lucide-react';
+import Logo from './Logo';
 
 export default function PixDonation() {
   const [copied, setCopied] = React.useState(false);
@@ -34,10 +35,9 @@ export default function PixDonation() {
               <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/60">Apoie o extraordinário</span>
             </div>
             
-            <h2 className="text-4xl md:text-6xl font-black tracking-tighter mb-6 leading-[0.9]">
-              💔 INABALAVEL<br />
-              <span className="text-brand-gradient">CRIE O EXTRAORDINÁRIO</span>
-            </h2>
+            <div className="mb-6">
+              <Logo size="lg" />
+            </div>
             
             <p className="text-lg text-white/40 max-w-md mb-8 font-medium">
               Sua doação ajuda a manter este projeto vivo e em constante evolução. 

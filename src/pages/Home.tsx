@@ -8,13 +8,13 @@ import {
   Zap, 
   Globe, 
   Layout, 
-  Heart, 
   ArrowRight,
   Code,
   Smartphone,
   MousePointer2,
   ShieldCheck
 } from 'lucide-react';
+import Logo from '../components/Logo';
 
 export default function Home() {
   const [freeMode, setFreeMode] = React.useState(false);
@@ -213,7 +213,6 @@ export default function Home() {
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
           <div>
             <div className="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-red-500/10 border border-red-500/20 mb-8">
-              <Heart size={12} className="text-red-500 fill-red-500" />
               <span className="text-[10px] font-black uppercase tracking-widest text-red-500">O Manifesto</span>
             </div>
             <h2 className="text-6xl md:text-8xl font-black tracking-tighter mb-12 leading-[0.85] uppercase">
@@ -269,9 +268,9 @@ export default function Home() {
                  <motion.div 
                   animate={{ y: [0, 20, 0], x: [0, -10, 0] }}
                   transition={{ duration: 5, repeat: Infinity, delay: 1 }}
-                  className="absolute bottom-20 -left-10 p-6 bg-red-600 rounded-[32px] shadow-2xl"
+                  className="absolute bottom-20 -left-10"
                  >
-                  <Heart size={32} className="text-white fill-white" />
+                  <Logo size="lg" />
                  </motion.div>
               </div>
             </div>
@@ -286,9 +285,8 @@ export default function Home() {
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row items-start justify-between gap-16 mb-24">
             <div className="max-w-sm">
-              <div className="flex items-center gap-3 mb-8">
-                <Heart size={32} className="text-red-500 fill-red-500" />
-                <span className="font-black tracking-tighter uppercase text-3xl">Inabalável💔</span>
+              <div className="mb-8">
+                <Logo size="lg" />
               </div>
               <p className="text-white/40 font-medium leading-relaxed">
                 A plataforma definitiva para os subestimados. 

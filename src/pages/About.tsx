@@ -1,23 +1,23 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Heart, Sparkles, Zap, Globe, Smartphone, ArrowRight, User, Linkedin, Twitter, Github } from 'lucide-react';
+import { Sparkles, Zap, Globe, Smartphone, ArrowRight, User, Linkedin, Twitter, Github } from 'lucide-react';
+import Logo from '../components/Logo';
 
 export default function About() {
   return (
     <div className="space-y-20 pb-20">
       {/* Hero Section */}
-      <section className="text-center max-w-4xl mx-auto py-20">
+      <section className="text-center max-w-4xl mx-auto py-20 flex flex-col items-center">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 mb-8"
         >
-          <Heart size={14} className="text-red-500 fill-red-500" />
-          <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">O Manifesto Inabalável💔</span>
+          <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">O Manifesto Inabalável</span>
         </motion.div>
-        <h1 className="text-6xl md:text-[120px] font-black tracking-tighter mb-8 leading-[0.85] uppercase">
-          INABALÁVEL<span className="text-red-500">💔</span>
-        </h1>
+        <div className="mb-8">
+          <Logo size="xl" />
+        </div>
         <p className="text-xl md:text-2xl text-white/40 font-medium leading-tight max-w-2xl mx-auto">
           Nascido da rejeição, forjado na persistência. 
           Este é o lugar onde os ignorados criam o extraordinário.
@@ -43,7 +43,7 @@ export default function About() {
         <div className="space-y-8">
           <h2 className="text-4xl font-black tracking-tighter">"NINGUÉM LIGA ATÉ QUE TODO MUNDO USE."</h2>
           <p className="text-lg text-white/60 leading-relaxed">
-            Olá, eu sou Marcelo da Silva Reis. Criei o Inabalável💔 porque cansei de ver ideias incríveis morrendo 
+            Olá, eu sou Marcelo da Silva Reis. Criei o Inabalável porque cansei de ver ideias incríveis morrendo 
             na praia por falta de recursos técnicos. 
             Minha missão é democratizar a criação extraordinária.
           </p>

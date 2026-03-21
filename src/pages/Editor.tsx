@@ -6,6 +6,7 @@ import { handleFirestoreError, OperationType } from '../utils/firestore-errors';
 import { generateProjectContent } from '../services/gemini';
 import { Project } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
+import Logo from '../components/Logo';
 import { 
   Save, 
   Globe, 
@@ -379,8 +380,8 @@ export default function Editor() {
                     )}
                   </section>
                 ))}
-                <footer className="p-6 md:p-8 text-center text-[10px] md:text-xs text-black/40 border-t border-black/5">
-                  Feito com Inabalável💔
+                <footer className="p-6 md:p-8 text-center text-[10px] md:text-xs text-black/40 border-t border-black/5 flex justify-center">
+                  <Logo size="sm" />
                 </footer>
               </div>
             )}

@@ -2,6 +2,7 @@ import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Coins, Zap, Sparkles, Check, ArrowRight, Heart } from 'lucide-react';
 import { auth } from '../firebase';
+import Logo from '../components/Logo';
 
 export default function Pricing() {
   const [loading, setLoading] = React.useState<string | null>(null);
@@ -88,9 +89,12 @@ export default function Pricing() {
       </AnimatePresence>
 
       <div className="text-center max-w-2xl mx-auto">
+        <div className="flex justify-center mb-8">
+          <Logo size="lg" />
+        </div>
         <h1 className="text-4xl md:text-6xl font-black tracking-tighter mb-4">ABASTEÇA SUA <span className="text-purple-500">CRIATIVIDADE</span>.</h1>
         <p className="text-xl text-white/60">
-          Inabalável💔 usa um sistema de moedas justo: pague apenas pelo que usar. 
+          O Inabalável usa um sistema de moedas justo: pague apenas pelo que usar. 
           Sem assinaturas mensais chatas.
         </p>
       </div>

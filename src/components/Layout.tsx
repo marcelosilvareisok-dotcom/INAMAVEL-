@@ -6,7 +6,6 @@ import {
   Coins, 
   User, 
   LogOut, 
-  Heart,
   Menu,
   X,
   ShieldCheck
@@ -15,6 +14,7 @@ import { auth } from '../firebase';
 import { signOut } from 'firebase/auth';
 import { motion, AnimatePresence } from 'motion/react';
 import Footer from './Footer';
+import Logo from './Logo';
 import { cn } from '../utils';
 
 interface LayoutProps {
@@ -52,11 +52,8 @@ export default function Layout({ children, user, coins }: LayoutProps) {
             >
               {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
-            <Link to="/" className="flex items-center gap-2 group">
-              <Heart className="text-white group-hover:scale-105 transition-transform" size={20} />
-              <span className="text-sm font-semibold tracking-tight text-white">
-                Inabalável
-              </span>
+            <Link to="/" className="flex items-center">
+              <Logo size="sm" />
             </Link>
           </div>
 

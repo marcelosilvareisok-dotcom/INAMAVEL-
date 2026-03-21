@@ -1,7 +1,7 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { db, auth } from '../firebase';
-import { collection, query, where, onSnapshot, orderBy, doc, updateDoc, increment, setDoc, getDoc } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, orderBy, doc, updateDoc, increment, setDoc } from 'firebase/firestore';
 import { Project } from '../types';
 import { handleFirestoreError, OperationType } from '../utils/firestore-errors';
 import { motion, AnimatePresence } from 'motion/react';
@@ -10,42 +10,24 @@ import {
   Plus, 
   Search, 
   ExternalLink, 
-  MoreVertical, 
   Clock, 
   Globe, 
   Layout as LayoutIcon, 
-  Smartphone,
-  Zap,
   Trash2,
   Edit3,
-  Heart,
   Coins,
   Sparkles,
-  ZapOff,
-  MessageCircle,
-  HelpCircle
+  ArrowRight,
+  Monitor
 } from 'lucide-react';
-import PixDonation from '../components/PixDonation';
 
 export default function Dashboard() {
   const [projects, setProjects] = React.useState<Project[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [searchTerm, setSearchTerm] = React.useState('');
-  const [lastProject, setLastProject] = React.useState<Project | null>(null);
+  const [prompt, setPrompt] = React.useState('');
   const [showPaymentSuccess, setShowPaymentSuccess] = React.useState<{ coins: number } | null>(null);
-  const [freeMode, setFreeMode] = React.useState(false);
-
-  React.useEffect(() => {
-    const docRef = doc(db, 'settings', 'global');
-    const unsubscribe = onSnapshot(docRef, (docSnap) => {
-      if (docSnap.exists()) {
-        setFreeMode(docSnap.data().freeMode || false);
-      }
-    }, (error) => {
-      console.error("Error listening to settings:", error.code, error.message);
-    });
-    return () => unsubscribe();
-  }, []);
+  const navigate = useNavigate();
 
   React.useEffect(() => {
     // Handle payment success from Mercado Pago
@@ -65,7 +47,6 @@ export default function Dashboard() {
               });
 
               const transactionId = Math.random().toString(36).substring(7);
-              const transPath = `transactions/${transactionId}`;
               await setDoc(doc(db, 'transactions', transactionId), {
                 id: transactionId,
                 userId: user.uid,
@@ -76,7 +57,6 @@ export default function Dashboard() {
               });
 
               setShowPaymentSuccess({ coins });
-              // Clear URL params
               window.history.replaceState({}, document.title, window.location.pathname);
             } catch (error) {
               console.error("Erro ao atualizar moedas:", error);
@@ -84,7 +64,7 @@ export default function Dashboard() {
             }
           };
           updateCoins();
-          unsubscribe(); // Only run once when user is found
+          unsubscribe();
         }
       });
       return () => unsubscribe();
@@ -107,13 +87,6 @@ export default function Dashboard() {
       })) as Project[];
       setProjects(projectsData);
       setLoading(false);
-
-      // Check for last project in memory
-      const lastId = localStorage.getItem('last_project_id');
-      if (lastId) {
-        const found = projectsData.find(p => p.id === lastId);
-        if (found) setLastProject(found);
-      }
     }, (error) => {
       handleFirestoreError(error, OperationType.LIST, 'projects');
     });
@@ -125,8 +98,15 @@ export default function Dashboard() {
     p.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const handleCreateProject = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!prompt.trim()) return;
+    // Pass the prompt to the new project page
+    navigate('/new', { state: { initialPrompt: prompt } });
+  };
+
   return (
-    <div className="space-y-12 pb-20">
+    <div className="space-y-10 pb-20 max-w-4xl mx-auto">
       <AnimatePresence>
         {showPaymentSuccess && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
@@ -135,212 +115,166 @@ export default function Dashboard() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setShowPaymentSuccess(null)}
-              className="absolute inset-0 bg-black/80 backdrop-blur-md"
+              className="absolute inset-0 bg-black/80 backdrop-blur-sm"
             />
             <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-sm bg-[#0a0a0a] border border-white/10 rounded-[40px] p-12 text-center"
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="relative w-full max-w-sm bg-[#09090B] border border-white/10 rounded-2xl p-8 text-center shadow-2xl"
             >
-              <div className="w-20 h-20 bg-yellow-500/20 rounded-3xl flex items-center justify-center mx-auto mb-8">
-                <Coins size={40} className="text-yellow-500" />
+              <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6 border border-white/10">
+                <Coins size={32} className="text-white" />
               </div>
-              <h2 className="text-3xl font-black tracking-tighter mb-4">RECARGA CONCLUÍDA!</h2>
-              <p className="text-white/60 mb-8">
-                Você recebeu {showPaymentSuccess.coins} moedas extraordinárias via Mercado Pago. 
-                Sua criatividade agora não tem limites.
+              <h2 className="text-xl font-semibold mb-2">Recarga Concluída</h2>
+              <p className="text-sm text-white/60 mb-8">
+                Você recebeu {showPaymentSuccess.coins} moedas. Sua criatividade agora não tem limites.
               </p>
               <button 
                 onClick={() => setShowPaymentSuccess(null)}
-                className="w-full py-4 bg-white text-black font-bold rounded-2xl hover:bg-white/90 transition-all"
+                className="w-full py-2.5 bg-white text-black text-sm font-medium rounded-lg hover:bg-white/90 transition-all"
               >
-                Continuar Criando
+                Continuar
               </button>
             </motion.div>
           </div>
         )}
       </AnimatePresence>
 
-      {/* Pix Donation Section */}
-      <PixDonation />
-
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pt-8 border-t border-white/5">
-        <div className="flex flex-wrap items-center gap-4 md:gap-6">
-          <div>
-            <h1 className="text-4xl sm:text-5xl font-black tracking-tighter uppercase leading-none">MEUS PROJETOS</h1>
-            <p className="text-white/40 font-medium mt-2">Gerencie suas criações extraordinárias.</p>
-          </div>
-          {freeMode && (
-            <div className="px-4 py-2 bg-purple-500/10 border border-purple-500/20 rounded-full flex items-center gap-2 animate-pulse">
-              <Zap size={14} className="text-purple-400" />
-              <span className="text-[10px] font-black uppercase tracking-widest text-purple-400">MODO GRÁTIS ATIVO</span>
+      {/* Hero / Create Section */}
+      <div className="flex flex-col items-center justify-center pt-12 pb-8 text-center space-y-6">
+        <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-white">
+          O que você quer construir?
+        </h1>
+        <p className="text-white/50 text-sm max-w-md">
+          Descreva sua ideia em detalhes e nossa IA cuidará do resto.
+        </p>
+        
+        <form onSubmit={handleCreateProject} className="w-full max-w-2xl relative mt-4 group">
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-white/10 to-white/5 rounded-2xl blur opacity-0 group-hover:opacity-100 transition duration-500"></div>
+          <div className="relative flex items-center bg-[#0A0A0A] border border-white/10 rounded-2xl overflow-hidden shadow-sm focus-within:border-white/30 focus-within:ring-1 focus-within:ring-white/30 transition-all">
+            <div className="pl-4 text-white/40">
+              <Sparkles size={20} />
             </div>
-          )}
-          <a 
-            href="https://wa.me/5594991233751" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="hidden md:flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-full hover:bg-white/10 transition-all group"
-          >
-            <MessageCircle size={14} className="text-green-500 group-hover:scale-110 transition-transform" />
-            <span className="text-[10px] font-black uppercase tracking-widest text-white/60">Suporte Direto</span>
-          </a>
-        </div>
-        <div className="flex flex-wrap items-center gap-3">
-          {lastProject && (
-            <Link
-              to={`/editor/${lastProject.id}`}
-              className="hidden sm:flex items-center gap-2 px-4 py-3 bg-white/5 border border-white/10 text-white font-bold rounded-xl hover:bg-white/10 transition-all active:scale-95"
-            >
-              <Clock size={18} className="text-purple-400" />
-              <span className="truncate max-w-[150px]">Continuar: {lastProject.name}</span>
-            </Link>
-          )}
-          <Link
-            to="/new"
-            className="flex items-center justify-center gap-2 px-6 py-3 bg-white text-black font-bold rounded-xl hover:bg-white/90 transition-all shadow-lg shadow-white/5 active:scale-95 w-full sm:w-auto"
-          >
-            <Plus size={20} />
-            Novo Projeto
-          </Link>
-        </div>
-      </div>
-
-      {/* Stats / Quick Info */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {[
-          { label: "Projetos Ativos", value: projects.length, icon: LayoutIcon, color: "text-purple-400" },
-          { label: "Publicados", value: projects.filter(p => p.status === 'published').length, icon: Globe, color: "text-blue-400" },
-          { label: "Rascunhos", value: projects.filter(p => p.status === 'draft').length, icon: Clock, color: "text-yellow-400" },
-        ].map((stat, i) => (
-          <div key={i} className="p-6 rounded-3xl bg-white/5 border border-white/10">
-            <div className="flex items-center justify-between mb-4">
-              <stat.icon size={20} className={stat.color} />
-              <span className="text-2xl font-black">{stat.value}</span>
-            </div>
-            <p className="text-sm font-medium text-white/40 uppercase tracking-wider">{stat.label}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* Search & Filter */}
-      <div className="relative">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={20} />
-        <input
-          type="text"
-          placeholder="Pesquisar projetos..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none transition-all"
-        />
-      </div>
-
-      {/* Projects Grid */}
-      {loading ? (
-        <div className="flex flex-col items-center justify-center py-20 gap-4">
-          <div className="w-12 h-12 border-4 border-purple-500/20 border-t-purple-500 rounded-full animate-spin" />
-          <p className="text-white/40 font-medium">Carregando seus projetos...</p>
-        </div>
-      ) : filteredProjects.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <AnimatePresence mode="popLayout">
-            {filteredProjects.map((project) => (
-              <motion.div
-                key={project.id}
-                layout
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                className="group relative bg-white/5 border border-white/10 rounded-3xl overflow-hidden hover:border-white/20 transition-all"
+            <input
+              type="text"
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              placeholder="Ex: Uma landing page para uma agência de marketing digital..."
+              className="w-full bg-transparent border-none py-4 pl-3 pr-4 text-sm text-white placeholder:text-white/30 focus:outline-none focus:ring-0"
+            />
+            <div className="pr-2">
+              <button
+                type="submit"
+                disabled={!prompt.trim()}
+                className="p-2 bg-white text-black rounded-xl hover:bg-white/90 disabled:opacity-50 disabled:hover:bg-white transition-all"
               >
-                {/* Preview Area */}
-                <div className="aspect-video bg-[#0a0a0a] relative overflow-hidden flex items-center justify-center p-8">
-                  <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-red-500/5" />
-                  <div className="relative w-full h-full bg-white/5 rounded-xl border border-white/10 p-4 transform group-hover:scale-105 transition-transform duration-500">
-                    <div className="w-1/2 h-2 bg-white/10 rounded-full mb-4" />
-                    <div className="space-y-2">
-                      <div className="w-full h-1.5 bg-white/5 rounded-full" />
-                      <div className="w-2/3 h-1.5 bg-white/5 rounded-full" />
-                    </div>
-                  </div>
-                  
-                  {/* Overlay Actions */}
-                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
-                    <Link
-                      to={`/editor/${project.id}`}
-                      className="p-3 bg-white text-black rounded-xl hover:scale-110 transition-transform"
-                      title="Editar"
-                    >
-                      <Edit3 size={20} />
-                    </Link>
-                    {project.status === 'published' && (
-                      <a
-                        href={`/p/${project.slug}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="p-3 bg-purple-500 text-white rounded-xl hover:scale-110 transition-transform"
-                        title="Ver Site"
-                      >
-                        <ExternalLink size={20} />
-                      </a>
-                    )}
-                  </div>
-                </div>
-
-                {/* Info Area */}
-                <div className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <div>
-                      <h3 className="text-xl font-bold mb-1 truncate max-w-[200px]">{project.name}</h3>
-                      <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-white/40">
-                        <Zap size={12} className="text-yellow-500" />
-                        {project.type}
-                      </div>
-                    </div>
-                    <div className={cn(
-                      "px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border",
-                      project.status === 'published' 
-                        ? "bg-green-500/10 text-green-500 border-green-500/20" 
-                        : "bg-yellow-500/10 text-yellow-500 border-yellow-500/20"
-                    )}>
-                      {project.status === 'published' ? 'Publicado' : 'Rascunho'}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between pt-4 border-t border-white/5">
-                    <div className="flex items-center gap-2 text-white/40 text-xs">
-                      <Clock size={12} />
-                      {new Date(project.updatedAt).toLocaleDateString()}
-                    </div>
-                    <button className="p-2 text-white/20 hover:text-red-500 transition-colors">
-                      <Trash2 size={18} />
-                    </button>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </div>
-      ) : (
-        <div className="flex flex-col items-center justify-center py-20 px-4 text-center bg-white/5 rounded-[40px] border border-dashed border-white/10">
-          <div className="w-20 h-20 rounded-3xl bg-white/5 flex items-center justify-center mb-6">
-            <Heart size={40} className="text-white/20" />
+                <ArrowRight size={18} />
+              </button>
+            </div>
           </div>
-          <h2 className="text-2xl font-black mb-2">NADA POR AQUI... AINDA.</h2>
-          <p className="text-white/40 max-w-sm mb-8">
-            Suas ideias extraordinárias estão esperando para ganhar vida. 
-            Crie seu primeiro projeto agora.
-          </p>
-          <Link
-            to="/new"
-            className="px-8 py-4 bg-white text-black font-bold rounded-2xl hover:bg-white/90 transition-all active:scale-95"
-          >
-            Começar Meu Primeiro Projeto
-          </Link>
+        </form>
+      </div>
+
+      {/* Projects Section */}
+      <div className="space-y-6">
+        <div className="flex items-center justify-between border-b border-white/10 pb-4">
+          <h2 className="text-lg font-medium text-white">Projetos Recentes</h2>
+          
+          <div className="relative w-64 hidden sm:block">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" size={14} />
+            <input
+              type="text"
+              placeholder="Buscar projetos..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full bg-white/5 border border-white/10 rounded-lg py-1.5 pl-9 pr-3 text-xs text-white placeholder:text-white/30 focus:border-white/30 focus:outline-none transition-all"
+            />
+          </div>
         </div>
-      )}
+
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-20 gap-4">
+            <div className="w-6 h-6 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+            <p className="text-xs text-white/40">Carregando projetos...</p>
+          </div>
+        ) : filteredProjects.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <AnimatePresence mode="popLayout">
+              {filteredProjects.map((project) => (
+                <motion.div
+                  key={project.id}
+                  layout
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  className="group flex flex-col bg-[#0A0A0A] border border-white/10 rounded-xl overflow-hidden hover:border-white/20 hover:bg-white/[0.02] transition-all cursor-pointer"
+                  onClick={() => navigate(`/editor/${project.id}`)}
+                >
+                  {/* Minimal Preview Area */}
+                  <div className="h-32 bg-[#111] border-b border-white/5 relative flex items-center justify-center overflow-hidden">
+                    <Monitor size={32} className="text-white/10 group-hover:text-white/20 transition-colors" />
+                    
+                    {/* Quick Actions Overlay */}
+                    <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      {project.status === 'published' && (
+                        <a
+                          href={`/p/${project.slug}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="p-1.5 bg-black/50 backdrop-blur-sm text-white/70 hover:text-white rounded-md border border-white/10 transition-colors"
+                          title="Ver Site"
+                        >
+                          <ExternalLink size={14} />
+                        </a>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Info Area */}
+                  <div className="p-4 flex-1 flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <h3 className="text-sm font-medium text-white truncate pr-2">{project.name}</h3>
+                        <div className={cn(
+                          "w-2 h-2 rounded-full flex-shrink-0",
+                          project.status === 'published' ? "bg-green-500" : "bg-white/20"
+                        )} title={project.status === 'published' ? 'Publicado' : 'Rascunho'} />
+                      </div>
+                      <p className="text-xs text-white/40 truncate">{project.type}</p>
+                    </div>
+
+                    <div className="flex items-center justify-between mt-4 pt-3 border-t border-white/5">
+                      <div className="flex items-center gap-1.5 text-[11px] text-white/30">
+                        <Clock size={12} />
+                        {new Date(project.updatedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                      </div>
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          // Handle delete logic here or open a modal
+                        }}
+                        className="text-white/20 hover:text-red-400 transition-colors"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-16 px-4 text-center border border-dashed border-white/10 rounded-xl bg-white/[0.02]">
+            <LayoutIcon size={32} className="text-white/20 mb-4" />
+            <h3 className="text-sm font-medium text-white mb-1">Nenhum projeto encontrado</h3>
+            <p className="text-xs text-white/40 mb-6 max-w-xs">
+              Você ainda não criou nenhum projeto. Use a barra de pesquisa acima para começar.
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

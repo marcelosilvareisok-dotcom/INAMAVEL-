@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { db, auth } from '../firebase';
 import { doc, setDoc, updateDoc, increment, collection, serverTimestamp, getDoc, getDocFromServer } from 'firebase/firestore';
 import { handleFirestoreError, OperationType } from '../utils/firestore-errors';
@@ -7,29 +7,30 @@ import { generateProjectContent } from '../services/gemini';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Sparkles, 
-  Zap, 
   Layout, 
   Globe, 
   Smartphone, 
   ArrowRight, 
-  ArrowLeft,
   Loader2,
-  CheckCircle2,
   AlertCircle,
-  Coins
+  Coins,
+  Monitor
 } from 'lucide-react';
+import { cn } from '../utils';
 
 export default function NewProject() {
+  const location = useLocation();
   const [name, setName] = React.useState('');
   const [type, setType] = React.useState<'website' | 'app' | 'landing' | 'service'>('website');
-  const [objective, setObjective] = React.useState('');
+  const [objective, setObjective] = React.useState(location.state?.initialPrompt || '');
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState('');
   const [progress, setProgress] = React.useState(0);
   const navigate = useNavigate();
 
-  const handleGenerate = async () => {
-    if (!auth.currentUser) return;
+  const handleGenerate = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!auth.currentUser || !name.trim() || !objective.trim()) return;
     
     setLoading(true);
     setError('');
@@ -111,117 +112,129 @@ export default function NewProject() {
   };
 
   const projectTypes = [
-    { id: 'website', label: 'Website', icon: Globe, desc: 'Sites institucionais ou blogs.' },
-    { id: 'app', label: 'Web App', icon: Layout, desc: 'Aplicações com funcionalidades.' },
-    { id: 'landing', label: 'Landing Page', icon: Zap, desc: 'Páginas de alta conversão.' },
-    { id: 'service', label: 'Página de Serviço', icon: Smartphone, desc: 'Venda seus serviços online.' },
+    { id: 'website', label: 'Website', icon: Globe },
+    { id: 'app', label: 'Web App', icon: Monitor },
+    { id: 'landing', label: 'Landing Page', icon: Layout },
+    { id: 'service', label: 'Serviço', icon: Smartphone },
   ];
 
   return (
-    <div className="max-w-4xl mx-auto py-12 px-6">
+    <div className="max-w-3xl mx-auto py-12 px-4">
       {loading ? (
         <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
+          initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="flex flex-col items-center justify-center py-20 text-center"
+          className="flex flex-col items-center justify-center py-32 text-center"
         >
           <div className="relative mb-8">
-            <div className="w-24 h-24 border-4 border-purple-500/20 border-t-purple-500 rounded-full animate-spin" />
-            <Sparkles className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-purple-400" size={32} />
+            <div className="w-16 h-16 border-2 border-white/10 border-t-white rounded-full animate-spin" />
+            <Sparkles className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white/50" size={20} />
           </div>
-          <h2 className="text-3xl font-black mb-4">A IA ESTÁ CRIANDO O EXTRAORDINÁRIO...</h2>
-          <p className="text-white/40 mb-8 max-w-md">
-            Estamos transformando suas ideias em uma estrutura moderna e profissional. 
-            Isso levará apenas alguns segundos.
+          <h2 className="text-xl font-medium mb-3 text-white">Criando seu projeto...</h2>
+          <p className="text-sm text-white/40 mb-8 max-w-sm">
+            Nossa IA está estruturando sua ideia. Isso levará apenas alguns segundos.
           </p>
           
-          <div className="w-full max-w-md bg-white/5 h-2 rounded-full overflow-hidden border border-white/10">
+          <div className="w-full max-w-xs bg-white/5 h-1.5 rounded-full overflow-hidden">
             <motion.div 
-              className="h-full bg-gradient-to-r from-purple-500 to-red-500"
+              className="h-full bg-white"
               initial={{ width: 0 }}
               animate={{ width: `${progress}%` }}
+              transition={{ ease: "easeInOut" }}
             />
           </div>
-          <p className="mt-4 text-xs font-bold text-purple-400 uppercase tracking-widest">{progress}% CONCLUÍDO</p>
+          <p className="mt-4 text-[10px] font-medium text-white/40 uppercase tracking-widest">{progress}% concluído</p>
         </motion.div>
       ) : (
-        <div className="space-y-12">
-          <div className="text-center space-y-4">
-            <h1 className="text-5xl font-black tracking-tighter">CRIE SEU PROJETO</h1>
-            <p className="text-white/60 text-xl">Preencha os detalhes abaixo para começar.</p>
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="space-y-8"
+        >
+          <div className="text-center space-y-3 mb-12">
+            <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-white">
+              Detalhes do Projeto
+            </h1>
+            <p className="text-white/50 text-sm">
+              Configure as informações básicas para a IA gerar a estrutura ideal.
+            </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="space-y-6">
-              <div className="space-y-2">
-                <label className="text-sm font-bold text-white/60 uppercase tracking-widest">Nome do Projeto</label>
+          <form onSubmit={handleGenerate} className="space-y-8">
+            <div className="space-y-6 bg-[#0A0A0A] border border-white/10 rounded-2xl p-6 sm:p-8">
+              
+              {/* Name Input */}
+              <div className="space-y-3">
+                <label className="text-sm font-medium text-white/80">Nome do Projeto</label>
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="Ex: Meu Portfólio, Inabalável App..."
-                  className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 outline-none focus:border-purple-500 transition-all"
+                  placeholder="Ex: Acme Corp, Meu Portfólio..."
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/30 focus:border-white/30 focus:ring-1 focus:ring-white/30 outline-none transition-all"
+                  autoFocus
                 />
               </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-bold text-white/60 uppercase tracking-widest">Tipo de Projeto</label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {/* Type Selection */}
+              <div className="space-y-3">
+                <label className="text-sm font-medium text-white/80">Tipo de Projeto</label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   {projectTypes.map((t) => (
                     <button
                       key={t.id}
+                      type="button"
                       onClick={() => setType(t.id as any)}
-                      className={`p-4 rounded-xl border-2 text-left transition-all flex items-center gap-3 ${
+                      className={cn(
+                        "flex flex-col items-center justify-center gap-2 p-4 rounded-xl border transition-all",
                         type === t.id 
-                          ? 'bg-purple-500/10 border-purple-500' 
-                          : 'bg-white/5 border-white/5 hover:border-white/20'
-                      }`}
+                          ? "bg-white/10 border-white/30 text-white" 
+                          : "bg-white/5 border-white/5 text-white/50 hover:border-white/20 hover:text-white/80"
+                      )}
                     >
-                      <t.icon size={20} className={type === t.id ? 'text-purple-400' : 'text-white/40'} />
-                      <span className="font-bold">{t.label}</span>
+                      <t.icon size={20} />
+                      <span className="text-xs font-medium">{t.label}</span>
                     </button>
                   ))}
                 </div>
               </div>
-            </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-white/60 uppercase tracking-widest">Objetivo</label>
-              <textarea
-                value={objective}
-                onChange={(e) => setObjective(e.target.value)}
-                placeholder="Ex: Um site para vender consultoria de marketing digital para iniciantes..."
-                className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 h-full min-h-[200px] outline-none focus:border-purple-500 transition-all resize-none"
-              />
-            </div>
-          </div>
-
-          {error && (
-            <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-2xl flex items-center gap-3 text-red-500">
-              <AlertCircle size={20} />
-              <p className="text-sm font-medium">{error}</p>
-            </div>
-          )}
-
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-6 bg-white/5 rounded-3xl border border-white/10">
-            <div className="flex items-center gap-3 w-full sm:w-auto">
-              <div className="w-10 h-10 rounded-xl bg-yellow-500/10 flex items-center justify-center shrink-0">
-                <Coins size={20} className="text-yellow-500" />
-              </div>
-              <div>
-                <p className="text-sm font-bold">Custo da Geração</p>
-                <p className="text-xs text-white/40">5 moedas serão debitadas</p>
+              {/* Prompt/Objective Input */}
+              <div className="space-y-3">
+                <label className="text-sm font-medium text-white/80">O que você quer construir?</label>
+                <textarea
+                  value={objective}
+                  onChange={(e) => setObjective(e.target.value)}
+                  placeholder="Descreva sua ideia em detalhes. Quanto mais específico, melhor o resultado..."
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/30 focus:border-white/30 focus:ring-1 focus:ring-white/30 outline-none transition-all min-h-[120px] resize-y"
+                />
               </div>
             </div>
-            <button
-              disabled={!name || !objective || loading}
-              onClick={handleGenerate}
-              className="w-full sm:w-auto px-10 py-4 bg-gradient-to-r from-purple-500 to-red-500 text-white font-bold rounded-2xl hover:scale-105 transition-all flex items-center justify-center gap-2 group disabled:opacity-50"
-            >
-              Gerar com IA <Sparkles size={20} className="group-hover:rotate-12 transition-transform" />
-            </button>
-          </div>
-        </div>
+
+            {error && (
+              <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-3 text-red-500">
+                <AlertCircle size={18} />
+                <p className="text-sm">{error}</p>
+              </div>
+            )}
+
+            {/* Action Footer */}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4">
+              <div className="flex items-center gap-3 text-sm text-white/60">
+                <Coins size={16} className="text-white/40" />
+                <span>Custo: <strong className="text-white">5 moedas</strong></span>
+              </div>
+              
+              <button
+                type="submit"
+                disabled={!name.trim() || !objective.trim() || loading}
+                className="w-full sm:w-auto px-8 py-3 bg-white text-black text-sm font-medium rounded-xl hover:bg-white/90 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:hover:bg-white"
+              >
+                Gerar Projeto <Sparkles size={16} />
+              </button>
+            </div>
+          </form>
+        </motion.div>
       )}
     </div>
   );

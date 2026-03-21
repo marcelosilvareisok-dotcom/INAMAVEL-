@@ -304,8 +304,14 @@ export default function Editor() {
                 <p className="text-xs font-bold text-white/40 uppercase tracking-widest">Código Fonte</p>
                 <div className="flex-1 bg-black/50 border border-white/10 rounded-2xl overflow-hidden relative">
                   <textarea 
-                    readOnly
-                    value={content.html || "Código não disponível."}
+                    value={content.html || ""}
+                    onChange={(e) => {
+                      const newHtml = e.target.value;
+                      setProject(prev => prev ? {
+                        ...prev,
+                        content: JSON.stringify({ ...content, html: newHtml })
+                      } : null);
+                    }}
                     className="absolute inset-0 w-full h-full bg-transparent text-green-400 font-mono text-[10px] p-4 resize-none focus:outline-none"
                   />
                 </div>

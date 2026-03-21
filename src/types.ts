@@ -19,6 +19,7 @@ export interface Project {
   createdAt: string;
   updatedAt: string;
   slug: string;
+  githubUrl?: string;
 }
 
 export interface Transaction {

@@ -56,11 +56,11 @@ export default function Home() {
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            className="relative"
+            className="relative w-full max-w-[100vw] overflow-hidden px-2"
           >
-            <h1 className="text-[15vw] md:text-[12vw] lg:text-[10vw] font-black tracking-tighter leading-[0.82] uppercase mb-8">
+            <h1 className="text-[14vw] sm:text-[12vw] md:text-[10vw] lg:text-[9vw] font-black tracking-tighter leading-[0.85] uppercase mb-8 break-words hyphens-auto">
               CRIE O <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 via-red-500 to-purple-500 bg-[length:200%_auto] animate-gradient">EXTRAORDINÁRIO</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 via-red-500 to-purple-500 bg-[length:200%_auto] animate-gradient block w-full break-all sm:break-normal">EXTRAORDINÁRIO</span>
             </h1>
             
             {/* Floating Badges */}

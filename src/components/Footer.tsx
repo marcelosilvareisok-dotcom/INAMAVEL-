@@ -25,7 +25,7 @@ export default function Footer() {
         <div className="space-y-4">
           <h4 className="text-sm font-black uppercase tracking-widest text-white/40">Colaboração</h4>
           <a 
-            href="https://github.com/seu-usuario/seu-projeto" 
+            href="https://github.com/marcelodasilvareis30" 
             target="_blank" 
             rel="noopener noreferrer"
             className="block text-white/60 hover:text-white transition-colors"

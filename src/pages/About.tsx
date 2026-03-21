@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Sparkles, Zap, Globe, Smartphone, ArrowRight, User, Linkedin, Twitter, Github } from 'lucide-react';
+import { Sparkles, Zap, Globe, Smartphone, ArrowRight, User, Linkedin, Twitter, Github, Heart } from 'lucide-react';
 import Logo from '../components/Logo';
 
 export default function About() {
@@ -49,14 +49,17 @@ export default function About() {
           </p>
           <div className="flex gap-4">
             {[
-              { icon: Linkedin, label: "LinkedIn" },
-              { icon: Twitter, label: "Twitter" },
-              { icon: Github, label: "GitHub" }
+              { icon: Linkedin, label: "LinkedIn", url: "https://linkedin.com/in/marcelodasilvareis30" },
+              { icon: Twitter, label: "Twitter", url: "https://twitter.com/marcelodasilvareis30" },
+              { icon: Github, label: "GitHub", url: "https://github.com/marcelodasilvareis30" }
             ].map((social, i) => (
               <a 
                 key={i}
-                href="#" 
+                href={social.url}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 hover:border-white/20 transition-all text-white/40 hover:text-white"
+                title={social.label}
               >
                 <social.icon size={20} />
               </a>

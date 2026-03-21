@@ -29,7 +29,8 @@
         "status": { "type": "string", "enum": ["draft", "published"] },
         "createdAt": { "type": "string", "format": "date-time" },
         "updatedAt": { "type": "string", "format": "date-time" },
-        "slug": { "type": "string" }
+        "slug": { "type": "string" },
+        "githubUrl": { "type": "string" }
       },
       "required": ["id", "userId", "name", "type", "content", "status", "createdAt", "updatedAt", "slug"]
     },

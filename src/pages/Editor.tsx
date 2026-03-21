@@ -7,6 +7,7 @@ import { generateProjectContent } from '../services/gemini';
 import { Project } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
 import Logo from '../components/Logo';
+import PublishModal from '../components/PublishModal';
 import { 
   Save, 
   Globe, 
@@ -111,18 +112,7 @@ export default function Editor() {
 
   const handlePublish = async () => {
     if (!project || !id) return;
-    try {
-      const docRef = doc(db, 'projects', id);
-      await updateDoc(docRef, {
-        status: 'published',
-        updatedAt: new Date().toISOString()
-      });
-      setProject({ ...project, status: 'published' });
-      setShowPublishModal(true);
-    } catch (error) {
-      console.error("Erro ao publicar:", error);
-      handleFirestoreError(error, OperationType.UPDATE, `projects/${id}`);
-    }
+    setShowPublishModal(true);
   };
 
   const handleModify = async (e: React.FormEvent) => {
@@ -415,56 +405,17 @@ export default function Editor() {
         </main>
       </div>
 
-      {/* Publish Success Modal */}
-      <AnimatePresence>
-        {showPublishModal && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setShowPublishModal(false)}
-              className="absolute inset-0 bg-black/80 backdrop-blur-md"
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-lg bg-[#0a0a0a] border border-white/10 rounded-[40px] p-12 text-center"
-            >
-              <div className="w-20 h-20 bg-green-500/20 rounded-3xl flex items-center justify-center mx-auto mb-8">
-                <CheckCircle2 size={40} className="text-green-500" />
-              </div>
-              <h2 className="text-3xl font-black tracking-tighter mb-4">ESTÁ NO AR!</h2>
-              <p className="text-white/60 mb-8">
-                Seu projeto extraordinário agora é público. Compartilhe com o mundo.
-              </p>
-              
-              <div className="p-4 bg-white/5 rounded-2xl border border-white/10 flex items-center justify-between mb-8">
-                <code className="text-purple-400 font-bold truncate">inabalavel.app/p/{project.slug}</code>
-                <button className="p-2 hover:bg-white/10 rounded-lg transition-colors text-white/40 hover:text-white">
-                  <Save size={18} />
-                </button>
-              </div>
-
-              <div className="flex gap-4">
-                <button 
-                  onClick={() => setShowPublishModal(false)}
-                  className="flex-1 py-4 bg-white/5 text-white font-bold rounded-2xl hover:bg-white/10 transition-all"
-                >
-                  Continuar Editando
-                </button>
-                <button 
-                  onClick={() => navigate('/dashboard')}
-                  className="flex-1 py-4 bg-white text-black font-bold rounded-2xl hover:bg-white/90 transition-all"
-                >
-                  Ir para Dashboard
-                </button>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+      {/* Publish Modal */}
+      {project && (
+        <PublishModal 
+          isOpen={showPublishModal} 
+          onClose={() => setShowPublishModal(false)} 
+          project={project}
+          onPublishSuccess={() => {
+            setProject({ ...project, status: 'published' });
+          }}
+        />
+      )}
     </div>
   );
 }

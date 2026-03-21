@@ -27,7 +27,10 @@ export default function Pricing() {
         }),
       });
 
-      if (!response.ok) throw new Error('Falha ao criar preferência de pagamento');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.details || 'Falha ao criar preferência de pagamento');
+      }
 
       const { init_point } = await response.json();
       

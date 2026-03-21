@@ -1,8 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Coins, Zap, Sparkles, Check, ArrowRight, Heart } from 'lucide-react';
-import { db, auth } from '../firebase';
-import { doc, updateDoc, increment, setDoc } from 'firebase/firestore';
+import { auth } from '../firebase';
 
 export default function Pricing() {
   const [loading, setLoading] = React.useState<string | null>(null);

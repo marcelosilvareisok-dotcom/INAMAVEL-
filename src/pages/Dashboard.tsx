@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { db, auth } from '../firebase';
 import { collection, query, where, onSnapshot, orderBy, doc, updateDoc, increment, setDoc } from 'firebase/firestore';
 import { Project } from '../types';
+import { handleFirestoreError, OperationType } from '../utils/firestore-errors';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../utils';
 import { 
@@ -34,33 +35,41 @@ export default function Dashboard() {
     const paymentStatus = urlParams.get('payment');
     const coinsStr = urlParams.get('coins');
 
-    if (paymentStatus === 'success' && coinsStr && auth.currentUser) {
-      const coins = parseInt(coinsStr);
-      const updateCoins = async () => {
-        try {
-          const userRef = doc(db, 'users', auth.currentUser!.uid);
-          await updateDoc(userRef, {
-            coins: increment(coins)
-          });
+    if (paymentStatus === 'success' && coinsStr) {
+      const unsubscribe = auth.onAuthStateChanged((user) => {
+        if (user) {
+          const coins = parseInt(coinsStr);
+          const updateCoins = async () => {
+            try {
+              const userRef = doc(db, 'users', user.uid);
+              await updateDoc(userRef, {
+                coins: increment(coins)
+              });
 
-          const transactionId = Math.random().toString(36).substring(7);
-          await setDoc(doc(db, 'transactions', transactionId), {
-            id: transactionId,
-            userId: auth.currentUser!.uid,
-            amount: coins,
-            type: 'purchase',
-            description: `Compra de ${coins} moedas (Mercado Pago)`,
-            createdAt: new Date().toISOString()
-          });
+              const transactionId = Math.random().toString(36).substring(7);
+              const transPath = `transactions/${transactionId}`;
+              await setDoc(doc(db, 'transactions', transactionId), {
+                id: transactionId,
+                userId: user.uid,
+                amount: coins,
+                type: 'purchase',
+                description: `Compra de ${coins} moedas (Mercado Pago)`,
+                createdAt: new Date().toISOString()
+              });
 
-          setShowPaymentSuccess({ coins });
-          // Clear URL params
-          window.history.replaceState({}, document.title, window.location.pathname);
-        } catch (error) {
-          console.error("Erro ao atualizar moedas:", error);
+              setShowPaymentSuccess({ coins });
+              // Clear URL params
+              window.history.replaceState({}, document.title, window.location.pathname);
+            } catch (error) {
+              console.error("Erro ao atualizar moedas:", error);
+              handleFirestoreError(error, OperationType.WRITE, 'users/transactions');
+            }
+          };
+          updateCoins();
+          unsubscribe(); // Only run once when user is found
         }
-      };
-      updateCoins();
+      });
+      return () => unsubscribe();
     }
   }, []);
 
@@ -87,6 +96,8 @@ export default function Dashboard() {
         const found = projectsData.find(p => p.id === lastId);
         if (found) setLastProject(found);
       }
+    }, (error) => {
+      handleFirestoreError(error, OperationType.LIST, 'projects');
     });
 
     return () => unsubscribe();

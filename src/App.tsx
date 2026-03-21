@@ -3,9 +3,11 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'r
 import { auth, db } from './firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, onSnapshot } from 'firebase/firestore';
+import { handleFirestoreError, OperationType } from './utils/firestore-errors';
 import { motion } from 'motion/react';
 import { Heart } from 'lucide-react';
 import { UserProfile } from './types';
+import ErrorBoundary from './components/ErrorBoundary';
 
 // Pages
 import Home from './pages/Home';
@@ -85,65 +87,69 @@ export default function App() {
         setProfile(doc.data() as UserProfile);
       }
       setLoading(false);
+    }, (error) => {
+      handleFirestoreError(error, OperationType.GET, `users/${user.uid}`);
     });
 
     return () => unsubscribeProfile();
   }, [user]);
 
   return (
-    <Router>
-      <Routes>
-        {/* Public Routes without Layout */}
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        
-        {/* Editor has its own custom layout */}
-        <Route 
-          path="/editor/:id" 
-          element={
-            <AuthGuard>
-              <Editor />
-            </AuthGuard>
-          } 
-        />
+    <ErrorBoundary>
+      <Router>
+        <Routes>
+          {/* Public Routes without Layout */}
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          
+          {/* Editor has its own custom layout */}
+          <Route 
+            path="/editor/:id" 
+            element={
+              <AuthGuard>
+                <Editor />
+              </AuthGuard>
+            } 
+          />
 
-        {/* Routes with Main Layout */}
-        <Route
-          path="*"
-          element={
-            <Layout user={user} coins={profile?.coins || 0}>
-              <Routes>
-                <Route
-                  path="/dashboard"
-                  element={
-                    <AuthGuard>
-                      <Dashboard />
-                    </AuthGuard>
-                  }
-                />
-                <Route
-                  path="/new"
-                  element={
-                    <AuthGuard>
-                      <NewProject />
-                    </AuthGuard>
-                  }
-                />
-                <Route
-                  path="/pricing"
-                  element={
-                    <AuthGuard>
-                      <Pricing />
-                    </AuthGuard>
-                  }
-                />
-                <Route path="/about" element={<About />} />
-                <Route path="*" element={<Navigate to="/dashboard" replace />} />
-              </Routes>
-            </Layout>
-          }
-        />
-      </Routes>
-    </Router>
+          {/* Routes with Main Layout */}
+          <Route
+            path="*"
+            element={
+              <Layout user={user} coins={profile?.coins || 0}>
+                <Routes>
+                  <Route
+                    path="/dashboard"
+                    element={
+                      <AuthGuard>
+                        <Dashboard />
+                      </AuthGuard>
+                    }
+                  />
+                  <Route
+                    path="/new"
+                    element={
+                      <AuthGuard>
+                        <NewProject />
+                      </AuthGuard>
+                    }
+                  />
+                  <Route
+                    path="/pricing"
+                    element={
+                      <AuthGuard>
+                        <Pricing />
+                      </AuthGuard>
+                    }
+                  />
+                  <Route path="/about" element={<About />} />
+                  <Route path="*" element={<Navigate to="/dashboard" replace />} />
+                </Routes>
+              </Layout>
+            }
+          />
+        </Routes>
+      </Router>
+    </ErrorBoundary>
   );
 }

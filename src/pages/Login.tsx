@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { auth, googleProvider, db } from '../firebase';
 import { signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { handleFirestoreError, OperationType } from '../utils/firestore-errors';
 import { motion } from 'motion/react';
 import { Heart, Mail, Lock, Chrome, ArrowRight, Sparkles } from 'lucide-react';
 
@@ -27,21 +28,25 @@ export default function Login() {
   };
 
   const handleAuthSuccess = async (user: any) => {
-    const userRef = doc(db, 'users', user.uid);
-    const userDoc = await getDoc(userRef);
+    try {
+      const userRef = doc(db, 'users', user.uid);
+      const userDoc = await getDoc(userRef);
 
-    if (!userDoc.exists()) {
-      await setDoc(userRef, {
-        uid: user.uid,
-        email: user.email,
-        displayName: user.displayName || email.split('@')[0],
-        photoURL: user.photoURL || '',
-        coins: 100, // Welcome bonus increased
-        createdAt: serverTimestamp(),
-        role: 'user'
-      });
+      if (!userDoc.exists()) {
+        await setDoc(userRef, {
+          uid: user.uid,
+          email: user.email,
+          displayName: user.displayName || email.split('@')[0],
+          photoURL: user.photoURL || '',
+          coins: 100, // Welcome bonus increased
+          createdAt: serverTimestamp(),
+          role: 'user'
+        });
+      }
+      navigate('/dashboard');
+    } catch (error) {
+      handleFirestoreError(error, OperationType.WRITE, 'users');
     }
-    navigate('/dashboard');
   };
 
   const handleGoogleLogin = async () => {

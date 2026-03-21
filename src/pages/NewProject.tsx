@@ -1,7 +1,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { db, auth } from '../firebase';
-import { doc, setDoc, updateDoc, increment, collection, serverTimestamp } from 'firebase/firestore';
+import { doc, setDoc, updateDoc, increment, collection, serverTimestamp, getDoc } from 'firebase/firestore';
+import { handleFirestoreError, OperationType } from '../utils/firestore-errors';
 import { generateProjectContent } from '../services/gemini';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
@@ -36,8 +37,19 @@ export default function NewProject() {
     setProgress(10);
 
     try {
-      // 1. Check coins (Simplified for now, assume user has enough)
+      // 1. Check coins
       setProgress(20);
+      const userRef = doc(db, 'users', auth.currentUser.uid);
+      const userDoc = await getDoc(userRef);
+      
+      if (!userDoc.exists()) {
+        throw new Error('Perfil de usuário não encontrado.');
+      }
+      
+      const userData = userDoc.data();
+      if (userData.coins < 5) {
+        throw new Error('Moedas insuficientes. Por favor, recarregue sua conta.');
+      }
       
       // 2. Generate content with AI
       const content = await generateProjectContent(name, type, objective);
@@ -64,7 +76,6 @@ export default function NewProject() {
       setProgress(80);
 
       // 4. Deduct coins (5 coins for generation)
-      const userRef = doc(db, 'users', auth.currentUser.uid);
       await updateDoc(userRef, {
         coins: increment(-5)
       });
@@ -84,6 +95,10 @@ export default function NewProject() {
       setTimeout(() => navigate(`/editor/${projectId}`), 1000);
 
     } catch (err: any) {
+      console.error("Erro na geração:", err);
+      if (err.message?.includes('permission-denied') || err.message?.includes('insufficient permissions')) {
+        handleFirestoreError(err, OperationType.WRITE, 'projects/users/transactions');
+      }
       setError(err.message || 'Erro ao gerar projeto. Tente novamente.');
       setLoading(false);
     }

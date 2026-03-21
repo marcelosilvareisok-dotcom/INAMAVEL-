@@ -2,6 +2,7 @@ import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { db, auth } from '../firebase';
 import { doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { handleFirestoreError, OperationType } from '../utils/firestore-errors';
 import { Project } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
@@ -44,12 +45,16 @@ export default function Editor() {
   React.useEffect(() => {
     const fetchProject = async () => {
       if (!id) return;
-      const docRef = doc(db, 'projects', id);
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        setProject({ id: docSnap.id, ...docSnap.data() } as Project);
+      try {
+        const docRef = doc(db, 'projects', id);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          setProject({ id: docSnap.id, ...docSnap.data() } as Project);
+        }
+        setLoading(false);
+      } catch (error) {
+        handleFirestoreError(error, OperationType.GET, `projects/${id}`);
       }
-      setLoading(false);
     };
     fetchProject();
   }, [id]);
@@ -70,6 +75,9 @@ export default function Editor() {
         setTimeout(() => setSaving('idle'), 2000);
       } catch (error) {
         console.error("Erro ao salvar automaticamente:", error);
+        if (error instanceof Error && (error.message.includes('permission-denied') || error.message.includes('insufficient permissions'))) {
+          handleFirestoreError(error, OperationType.UPDATE, `projects/${id}`);
+        }
         setSaving('idle');
       }
     }, 2000); // Save after 2 seconds of inactivity
@@ -90,6 +98,7 @@ export default function Editor() {
       setTimeout(() => setSaving('idle'), 2000);
     } catch (error) {
       console.error("Erro ao salvar:", error);
+      handleFirestoreError(error, OperationType.UPDATE, `projects/${id}`);
       setSaving('idle');
     }
   };
@@ -106,6 +115,7 @@ export default function Editor() {
       setShowPublishModal(true);
     } catch (error) {
       console.error("Erro ao publicar:", error);
+      handleFirestoreError(error, OperationType.UPDATE, `projects/${id}`);
     }
   };
 

@@ -19,6 +19,9 @@ const client = new MercadoPagoConfig({
 // API Routes
 app.post("/api/create-preference", async (req, res) => {
   try {
+    if (!process.env.MERCADO_PAGO_ACCESS_TOKEN) {
+      throw new Error('MERCADO_PAGO_ACCESS_TOKEN is not set');
+    }
     const { title, price, quantity, userId, coins } = req.body;
 
     const preference = new Preference(client);

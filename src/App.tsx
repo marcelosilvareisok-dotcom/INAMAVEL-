@@ -8,6 +8,7 @@ import { motion } from 'motion/react';
 import { Heart } from 'lucide-react';
 import { UserProfile } from './types';
 import ErrorBoundary from './components/ErrorBoundary';
+import SplashScreen from './components/SplashScreen';
 
 // Pages
 import Home from './pages/Home';
@@ -67,6 +68,7 @@ export default function App() {
   const [user, setUser] = React.useState<any>(null);
   const [profile, setProfile] = React.useState<UserProfile | null>(null);
   const [loading, setLoading] = React.useState(true);
+  const [showSplash, setShowSplash] = React.useState(true);
 
   React.useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, (u) => {
@@ -97,6 +99,7 @@ export default function App() {
 
   return (
     <ErrorBoundary>
+      {showSplash && <SplashScreen onComplete={() => setShowSplash(false)} />}
       <Router>
         <Routes>
           {/* Public Routes without Layout */}

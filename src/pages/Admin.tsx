@@ -1,8 +1,8 @@
 import React from 'react';
-import { collection, getDocs, doc, updateDoc, query, orderBy } from 'firebase/firestore';
+import { collection, getDocs, doc, updateDoc, query, orderBy, setDoc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { motion } from 'motion/react';
-import { Users, Coins, Search, ShieldCheck, ArrowUpRight, ArrowDownRight, RefreshCw } from 'lucide-react';
+import { Users, Coins, Search, ShieldCheck, ArrowUpRight, ArrowDownRight, RefreshCw, Zap, ZapOff } from 'lucide-react';
 
 interface UserData {
   uid: string;
@@ -17,6 +17,20 @@ export default function Admin() {
   const [loading, setLoading] = React.useState(true);
   const [searchTerm, setSearchTerm] = React.useState('');
   const [updating, setUpdating] = React.useState<string | null>(null);
+  const [freeMode, setFreeMode] = React.useState(false);
+  const [updatingSettings, setUpdatingSettings] = React.useState(false);
+
+  const fetchSettings = async () => {
+    try {
+      const docRef = doc(db, 'settings', 'global');
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        setFreeMode(docSnap.data().freeMode || false);
+      }
+    } catch (error) {
+      console.error("Error fetching settings:", error);
+    }
+  };
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -37,7 +51,24 @@ export default function Admin() {
 
   React.useEffect(() => {
     fetchUsers();
+    fetchSettings();
   }, []);
+
+  const toggleFreeMode = async () => {
+    setUpdatingSettings(true);
+    try {
+      const newMode = !freeMode;
+      await setDoc(doc(db, 'settings', 'global'), {
+        freeMode: newMode,
+        updatedAt: new Date().toISOString()
+      }, { merge: true });
+      setFreeMode(newMode);
+    } catch (error) {
+      console.error("Error updating settings:", error);
+    } finally {
+      setUpdatingSettings(false);
+    }
+  };
 
   const handleUpdateCoins = async (userId: string, currentCoins: number, amount: number) => {
     const newAmount = Math.max(0, currentCoins + amount);
@@ -81,7 +112,7 @@ export default function Admin() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="p-6 bg-white/5 border border-white/10 rounded-[32px]">
           <div className="flex items-center gap-4 mb-2">
             <div className="w-10 h-10 bg-purple-500/20 rounded-xl flex items-center justify-center">
@@ -109,6 +140,30 @@ export default function Admin() {
           </div>
           <p className="text-3xl font-black text-green-500">ATIVO</p>
         </div>
+        <button 
+          onClick={toggleFreeMode}
+          disabled={updatingSettings}
+          className={`p-6 border rounded-[32px] text-left transition-all relative overflow-hidden group ${
+            freeMode 
+              ? 'bg-purple-500/20 border-purple-500' 
+              : 'bg-white/5 border-white/10 hover:border-white/20'
+          }`}
+        >
+          <div className="flex items-center gap-4 mb-2">
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+              freeMode ? 'bg-purple-500 text-white' : 'bg-white/10 text-white/40'
+            }`}>
+              {freeMode ? <Zap size={20} /> : <ZapOff size={20} />}
+            </div>
+            <span className="text-sm font-medium text-white/40 uppercase tracking-widest">Modo Grátis</span>
+          </div>
+          <p className="text-3xl font-black">{freeMode ? 'LIGADO' : 'DESLIGADO'}</p>
+          {updatingSettings && (
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center">
+              <RefreshCw className="animate-spin" />
+            </div>
+          )}
+        </button>
       </div>
 
       {/* Search */}

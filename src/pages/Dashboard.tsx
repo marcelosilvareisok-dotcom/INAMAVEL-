@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { db, auth } from '../firebase';
-import { collection, query, where, onSnapshot, orderBy, doc, updateDoc, increment, setDoc } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, orderBy, doc, updateDoc, increment, setDoc, getDoc } from 'firebase/firestore';
 import { Project } from '../types';
 import { handleFirestoreError, OperationType } from '../utils/firestore-errors';
 import { motion, AnimatePresence } from 'motion/react';
@@ -20,7 +20,8 @@ import {
   Edit3,
   Heart,
   Coins,
-  Sparkles
+  Sparkles,
+  ZapOff
 } from 'lucide-react';
 import PixDonation from '../components/PixDonation';
 
@@ -30,6 +31,22 @@ export default function Dashboard() {
   const [searchTerm, setSearchTerm] = React.useState('');
   const [lastProject, setLastProject] = React.useState<Project | null>(null);
   const [showPaymentSuccess, setShowPaymentSuccess] = React.useState<{ coins: number } | null>(null);
+  const [freeMode, setFreeMode] = React.useState(false);
+
+  React.useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const docRef = doc(db, 'settings', 'global');
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          setFreeMode(docSnap.data().freeMode || false);
+        }
+      } catch (error) {
+        console.error("Error fetching settings:", error);
+      }
+    };
+    fetchSettings();
+  }, []);
 
   React.useEffect(() => {
     // Handle payment success from Mercado Pago
@@ -150,10 +167,18 @@ export default function Dashboard() {
       <PixDonation />
 
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pt-8 border-t border-white/5">
-        <div>
-          <h1 className="text-4xl font-black tracking-tighter uppercase">MEUS PROJETOS</h1>
-          <p className="text-white/40 font-medium">Gerencie suas criações extraordinárias.</p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pt-8 border-t border-white/5">
+        <div className="flex items-center gap-6">
+          <div>
+            <h1 className="text-5xl font-black tracking-tighter uppercase leading-none">MEUS PROJETOS</h1>
+            <p className="text-white/40 font-medium mt-2">Gerencie suas criações extraordinárias.</p>
+          </div>
+          {freeMode && (
+            <div className="px-4 py-2 bg-purple-500/10 border border-purple-500/20 rounded-full flex items-center gap-2 animate-pulse">
+              <Zap size={14} className="text-purple-400" />
+              <span className="text-[10px] font-black uppercase tracking-widest text-purple-400">MODO GRÁTIS ATIVO</span>
+            </div>
+          )}
         </div>
         <div className="flex items-center gap-3">
           {lastProject && (

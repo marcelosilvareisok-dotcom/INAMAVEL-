@@ -37,8 +37,13 @@ export default function NewProject() {
     setProgress(10);
 
     try {
-      // 1. Check coins
+      // 1. Check Free Mode and coins
       setProgress(20);
+      
+      const settingsRef = doc(db, 'settings', 'global');
+      const settingsSnap = await getDoc(settingsRef);
+      const isFreeMode = settingsSnap.exists() && settingsSnap.data().freeMode === true;
+
       const userRef = doc(db, 'users', auth.currentUser.uid);
       const userDoc = await getDoc(userRef);
       
@@ -47,7 +52,7 @@ export default function NewProject() {
       }
       
       const userData = userDoc.data();
-      if (userData.coins < 5) {
+      if (!isFreeMode && userData.coins < 5) {
         throw new Error('Moedas insuficientes. Por favor, recarregue sua conta.');
       }
       
@@ -75,21 +80,23 @@ export default function NewProject() {
       await setDoc(doc(db, 'projects', projectId), projectData);
       setProgress(80);
 
-      // 4. Deduct coins (5 coins for generation)
-      await updateDoc(userRef, {
-        coins: increment(-5)
-      });
-      
-      // 5. Log transaction
-      const transactionId = Math.random().toString(36).substring(7);
-      await setDoc(doc(db, 'transactions', transactionId), {
-        id: transactionId,
-        userId: auth.currentUser.uid,
-        amount: 5,
-        type: 'spend',
-        description: `Geração de projeto: ${name}`,
-        createdAt: new Date().toISOString()
-      });
+      // 4. Deduct coins if not in Free Mode
+      if (!isFreeMode) {
+        await updateDoc(userRef, {
+          coins: increment(-5)
+        });
+        
+        // 5. Log transaction
+        const transactionId = Math.random().toString(36).substring(7);
+        await setDoc(doc(db, 'transactions', transactionId), {
+          id: transactionId,
+          userId: auth.currentUser.uid,
+          amount: 5,
+          type: 'spend',
+          description: `Geração de projeto: ${name}`,
+          createdAt: new Date().toISOString()
+        });
+      }
 
       setProgress(100);
       setTimeout(() => navigate(`/editor/${projectId}`), 1000);

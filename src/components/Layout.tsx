@@ -51,8 +51,8 @@ export default function Layout({ children, user, coins }: LayoutProps) {
                 <Heart className="text-red-500 fill-red-500 group-hover:scale-110 transition-transform" size={24} />
                 <div className="absolute -top-1 -right-1 w-2 h-2 bg-purple-500 rounded-full animate-pulse" />
               </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent">
-                Inabalável
+              <span className="text-xl font-black tracking-tighter uppercase text-white">
+                Inabalável<span className="text-red-500">💔</span>
               </span>
             </Link>
           </div>
@@ -115,15 +115,16 @@ export default function Layout({ children, user, coins }: LayoutProps) {
           </div>
           
           <div className="mt-auto p-4 border-t border-white/5">
-            <div className="p-4 rounded-2xl bg-gradient-to-br from-purple-500/10 to-red-500/10 border border-white/5">
-              <p className="text-xs text-white/40 uppercase tracking-wider font-bold mb-2">Plano Atual</p>
-              <p className="text-sm font-bold text-white mb-1">Grátis</p>
-              <p className="text-xs text-white/60 mb-3">1 projeto ativo</p>
+            <div className="p-6 rounded-[32px] bg-gradient-to-br from-purple-600/20 to-red-600/20 border border-white/10 relative overflow-hidden group">
+              <div className="absolute top-0 right-0 -mt-4 -mr-4 w-16 h-16 bg-white/10 blur-2xl rounded-full group-hover:scale-150 transition-transform duration-700" />
+              <p className="text-[10px] text-white/40 uppercase tracking-[0.2em] font-black mb-3">Inabalável💔</p>
+              <p className="text-lg font-black text-white mb-1 leading-tight">CRIE O EXTRAORDINÁRIO</p>
+              <p className="text-xs text-white/60 mb-4">Sua visão, sem limites.</p>
               <Link 
                 to="/pricing"
-                className="block w-full py-2 text-center text-xs font-bold bg-white text-black rounded-lg hover:bg-white/90 transition-colors"
+                className="block w-full py-3 text-center text-xs font-black uppercase tracking-widest bg-white text-black rounded-xl hover:bg-white/90 transition-all active:scale-95"
               >
-                Melhorar Plano
+                Upgrade
               </Link>
             </div>
           </div>

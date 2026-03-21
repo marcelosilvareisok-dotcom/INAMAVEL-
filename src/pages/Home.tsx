@@ -38,16 +38,16 @@ export default function Home() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-5xl md:text-8xl font-black tracking-tighter mb-8 leading-[0.9]"
+            className="text-6xl md:text-[120px] font-black tracking-tighter mb-8 leading-[0.85] uppercase"
           >
-            CRIE O <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-red-500">EXTRAORDINÁRIO</span> EM SEGUNDOS.
+            CRIE O <span className="text-brand-gradient">EXTRAORDINÁRIO</span> EM SEGUNDOS.
           </motion.h1>
 
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-xl text-white/60 max-w-2xl mx-auto mb-12 leading-relaxed"
+            className="text-xl md:text-2xl text-white/40 max-w-3xl mx-auto mb-12 leading-tight font-medium"
           >
             Inabalável💔 é o construtor de sites com IA para quem foi ignorado. 
             Transforme sua visão em realidade sem escrever uma única linha de código.
@@ -180,11 +180,11 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="py-12 px-4 border-t border-white/5">
+      <footer className="py-20 px-4 border-t border-white/5">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
           <div className="flex items-center gap-2">
             <Heart size={20} className="text-red-500 fill-red-500" />
-            <span className="font-bold">Inabalável💔</span>
+            <span className="font-black tracking-tighter uppercase text-xl">Inabalável💔</span>
           </div>
           <p className="text-white/40 text-sm">
             © 2026 Inabalável. Criado por Marcelo da Silva Reis.

@@ -6,21 +6,21 @@ export default function About() {
   return (
     <div className="space-y-20 pb-20">
       {/* Hero Section */}
-      <section className="text-center max-w-3xl mx-auto py-12">
+      <section className="text-center max-w-4xl mx-auto py-20">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-red-500/10 border border-red-500/20 mb-8"
+          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 mb-8"
         >
           <Heart size={14} className="text-red-500 fill-red-500" />
-          <span className="text-sm font-bold text-red-500 uppercase tracking-widest">O Manifesto Inabalável</span>
+          <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">O Manifesto Inabalável💔</span>
         </motion.div>
-        <h1 className="text-5xl md:text-8xl font-black tracking-tighter mb-8 leading-[0.9]">
-          PARA OS <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-red-500">IGNORADOS</span> QUE QUEREM DOMINAR.
+        <h1 className="text-6xl md:text-[120px] font-black tracking-tighter mb-8 leading-[0.85] uppercase">
+          INABALÁVEL<span className="text-red-500">💔</span>
         </h1>
-        <p className="text-xl text-white/60 leading-relaxed">
-          Inabalável💔 não é apenas uma ferramenta. É um movimento. 
-          Nascemos da ideia de que as visões mais poderosas muitas vezes vêm de quem ninguém espera.
+        <p className="text-xl md:text-2xl text-white/40 font-medium leading-tight max-w-2xl mx-auto">
+          Nascido da rejeição, forjado na persistência. 
+          Este é o lugar onde os ignorados criam o extraordinário.
         </p>
       </section>
 

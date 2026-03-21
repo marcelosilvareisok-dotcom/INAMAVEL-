@@ -8,25 +8,41 @@ if (!apiKey) {
 
 const ai = new GoogleGenAI({ apiKey: apiKey || "" });
 
-export async function generateProjectContent(name: string, type: string, objective: string) {
-  const prompt = `
-    Crie um conteúdo estruturado EM PORTUGUÊS DO BRASIL para um projeto chamado "${name}".
+export async function generateProjectContent(name: string, type: string, objective: string, currentHtml?: string, modificationPrompt?: string) {
+  let prompt = `
+    Você é um desenvolvedor frontend expert (nível engenheiro sênior).
+    Seu objetivo é criar uma interface de usuário completa, moderna e responsiva baseada nos requisitos abaixo.
+
+    Projeto: ${name}
     Tipo: ${type}
     Objetivo: ${objective}
-    
-    O conteúdo deve ser um objeto JSON contendo:
-    - title: Título impactante em português
-    - description: Descrição curta e persuasiva em português
-    - sections: Um array de seções, cada uma com:
-      - id: Identificador único
-      - type: 'hero' | 'features' | 'about' | 'cta' | 'contact'
-      - title: Título da seção em português
-      - content: Texto principal da seção em português
-      - items: (opcional) Array de strings para listas ou cards em português
-    - theme: Cores sugeridas (primary, secondary, accent)
-    
-    Retorne APENAS o JSON válido.
+
+    REGRAS ESTRITAS:
+    1. O código HTML deve ser um documento completo (<html>...</html>).
+    2. Use Tailwind CSS via CDN (<script src="https://cdn.tailwindcss.com"></script>) no <head>.
+    3. O design deve ser premium, minimalista, focado em conversão e com estética "Lovable/Vercel" (cores neutras, bordas sutis, glassmorphism, tipografia limpa como Inter).
+    4. Use ícones do Lucide (via CDN ou SVG inline) ou FontAwesome se necessário.
+    5. Para imagens, use placeholders do Unsplash (ex: https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=800&q=80).
+    6. O código deve ser 100% responsivo (mobile-first).
+    7. Adicione interatividade básica com JavaScript puro (vanilla JS) no final do <body> se necessário (ex: menu mobile, modais).
+    8. Retorne APENAS o JSON válido com a propriedade "html".
   `;
+
+  if (currentHtml && modificationPrompt) {
+    prompt = `
+      Você é um desenvolvedor frontend expert.
+      Aqui está o código HTML atual de um projeto:
+      \`\`\`html
+      ${currentHtml}
+      \`\`\`
+
+      O usuário pediu a seguinte alteração: "${modificationPrompt}"
+
+      Retorne o código HTML COMPLETO e atualizado, mantendo o que estava bom e aplicando a alteração.
+      Mantenha o Tailwind CSS via CDN e todas as regras de design premium.
+      Retorne APENAS o JSON válido com a propriedade "html".
+    `;
+  }
 
   try {
     const response = await ai.models.generateContent({
@@ -37,32 +53,9 @@ export async function generateProjectContent(name: string, type: string, objecti
         responseSchema: {
           type: Type.OBJECT,
           properties: {
-            title: { type: Type.STRING },
-            description: { type: Type.STRING },
-            sections: {
-              type: Type.ARRAY,
-              items: {
-                type: Type.OBJECT,
-                properties: {
-                  id: { type: Type.STRING },
-                  type: { type: Type.STRING },
-                  title: { type: Type.STRING },
-                  content: { type: Type.STRING },
-                  items: { type: Type.ARRAY, items: { type: Type.STRING } }
-                },
-                required: ["id", "type", "title", "content"]
-              }
-            },
-            theme: {
-              type: Type.OBJECT,
-              properties: {
-                primary: { type: Type.STRING },
-                secondary: { type: Type.STRING },
-                accent: { type: Type.STRING }
-              }
-            }
+            html: { type: Type.STRING }
           },
-          required: ["title", "description", "sections"]
+          required: ["html"]
         }
       }
     });

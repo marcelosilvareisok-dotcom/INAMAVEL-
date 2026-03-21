@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { db, auth } from '../firebase';
 import { doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { handleFirestoreError, OperationType } from '../utils/firestore-errors';
+import { generateProjectContent } from '../services/gemini';
 import { Project } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
@@ -21,7 +22,9 @@ import {
   Image as ImageIcon,
   MousePointer2,
   CheckCircle2,
-  X
+  X,
+  Send,
+  Loader2
 } from 'lucide-react';
 
 export default function Editor() {
@@ -33,6 +36,8 @@ export default function Editor() {
   const [activeTab, setActiveTab] = React.useState<'content' | 'design' | 'settings'>('content');
   const [showPublishModal, setShowPublishModal] = React.useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
+  const [promptInput, setPromptInput] = React.useState('');
+  const [isGenerating, setIsGenerating] = React.useState(false);
   const navigate = useNavigate();
 
   // Remember last project
@@ -116,6 +121,42 @@ export default function Editor() {
     } catch (error) {
       console.error("Erro ao publicar:", error);
       handleFirestoreError(error, OperationType.UPDATE, `projects/${id}`);
+    }
+  };
+
+  const handleModify = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!promptInput.trim() || !project || isGenerating) return;
+
+    const currentContent = JSON.parse(project.content || '{}');
+    if (!currentContent.html) return;
+
+    setIsGenerating(true);
+    try {
+      const newContent = await generateProjectContent(
+        project.name, 
+        project.type, 
+        project.objective, 
+        currentContent.html, 
+        promptInput
+      );
+      
+      const updatedProject = {
+        ...project,
+        content: JSON.stringify(newContent),
+        updatedAt: new Date().toISOString()
+      };
+
+      const docRef = doc(db, 'projects', project.id);
+      await updateDoc(docRef, updatedProject);
+      
+      setProject(updatedProject);
+      setPromptInput('');
+    } catch (error) {
+      console.error("Erro ao modificar:", error);
+      alert("Erro ao modificar o projeto. Tente novamente.");
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -239,9 +280,8 @@ export default function Editor() {
           </div>
           <div className="flex p-2 gap-1 border-b border-white/5">
             {[
-              { id: 'content', icon: Layout, label: 'Estrutura' },
-              { id: 'design', icon: Sparkles, label: 'Design' },
-              { id: 'settings', icon: Settings, label: 'Config' },
+              { id: 'content', icon: Eye, label: 'Preview' },
+              { id: 'design', icon: Type, label: 'Código' },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -259,40 +299,24 @@ export default function Editor() {
           <div className="flex-1 overflow-y-auto p-4 space-y-6">
             {activeTab === 'content' && (
               <div className="space-y-4">
-                <p className="text-xs font-bold text-white/40 uppercase tracking-widest">Seções Geradas</p>
-                {content.sections?.map((section: any, i: number) => (
-                  <div key={section.id} className="p-4 bg-white/5 border border-white/10 rounded-2xl group hover:border-purple-500/50 transition-all cursor-pointer">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-purple-400">{section.type}</span>
-                      <MousePointer2 size={12} className="text-white/20 group-hover:text-purple-400" />
-                    </div>
-                    <h3 className="text-sm font-bold truncate">{section.title}</h3>
-                  </div>
-                ))}
-                <button className="w-full py-3 border-2 border-dashed border-white/10 rounded-2xl text-white/40 text-sm font-bold hover:border-white/20 hover:text-white transition-all flex items-center justify-center gap-2">
-                  <Plus size={16} /> Adicionar Seção
-                </button>
+                <p className="text-xs font-bold text-white/40 uppercase tracking-widest">Visualização</p>
+                <div className="p-4 bg-white/5 border border-white/10 rounded-2xl">
+                  <p className="text-sm text-white/80">
+                    Você está visualizando o resultado gerado pela IA. Use os botões no topo para testar a responsividade.
+                  </p>
+                </div>
               </div>
             )}
             
             {activeTab === 'design' && (
-              <div className="space-y-6">
-                <div className="space-y-4">
-                  <p className="text-xs font-bold text-white/40 uppercase tracking-widest">Paleta de Cores</p>
-                  <div className="grid grid-cols-3 gap-2">
-                    {['#8B5CF6', '#EF4444', '#050505'].map((color, i) => (
-                      <div key={i} className="aspect-square rounded-xl border border-white/10 p-1">
-                        <div className="w-full h-full rounded-lg" style={{ backgroundColor: color }} />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <div className="space-y-4">
-                  <p className="text-xs font-bold text-white/40 uppercase tracking-widest">Tipografia</p>
-                  <div className="p-4 bg-white/5 border border-white/10 rounded-2xl">
-                    <p className="text-lg font-black tracking-tighter">Inter Black</p>
-                    <p className="text-xs text-white/40">Sans-serif moderna</p>
-                  </div>
+              <div className="space-y-4 h-full flex flex-col">
+                <p className="text-xs font-bold text-white/40 uppercase tracking-widest">Código Fonte</p>
+                <div className="flex-1 bg-black/50 border border-white/10 rounded-2xl overflow-hidden relative">
+                  <textarea 
+                    readOnly
+                    value={content.html || "Código não disponível."}
+                    className="absolute inset-0 w-full h-full bg-transparent text-green-400 font-mono text-[10px] p-4 resize-none focus:outline-none"
+                  />
                 </div>
               </div>
             )}
@@ -303,7 +327,7 @@ export default function Editor() {
               <Zap size={20} className="text-purple-400" />
               <div>
                 <p className="text-xs font-bold text-purple-400">DICA IA</p>
-                <p className="text-[10px] text-white/60">Use o editor para refinar o que a IA criou.</p>
+                <p className="text-[10px] text-white/60">O código gerado usa Tailwind CSS puro.</p>
               </div>
             </div>
           </div>
@@ -324,35 +348,69 @@ export default function Editor() {
             )}
           </AnimatePresence>
 
-          <div className={`bg-white text-black transition-all duration-500 shadow-2xl overflow-hidden rounded-2xl h-fit ${
-            viewMode === 'desktop' ? 'w-full max-w-5xl' : 'w-full max-w-[375px]'
+          <div className={`bg-white text-black transition-all duration-500 shadow-2xl overflow-hidden rounded-2xl h-[calc(100vh-12rem)] ${
+            viewMode === 'desktop' ? 'w-full max-w-6xl' : 'w-full max-w-[375px]'
           }`}>
-            {/* Mock Website Content */}
-            <div className="min-h-full font-sans">
-              {content.sections?.map((section: any) => (
-                <section key={section.id} className={`p-6 md:p-12 ${section.type === 'hero' ? 'bg-black text-white' : 'bg-white text-black'}`}>
-                  <h2 className={`text-2xl md:text-4xl font-black tracking-tighter mb-4 ${section.type === 'hero' ? 'text-3xl md:text-6xl' : ''}`}>
-                    {section.title}
-                  </h2>
-                  <p className={`text-sm md:text-lg leading-relaxed ${section.type === 'hero' ? 'text-white/60' : 'text-black/60'}`}>
-                    {section.content}
-                  </p>
-                  {section.items && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-8 md:mt-12">
-                      {section.items.map((item: string, i: number) => (
-                        <div key={i} className={`p-4 md:p-6 rounded-2xl border ${section.type === 'hero' ? 'bg-white/5 border-white/10' : 'bg-black/5 border-black/10'}`}>
-                          <p className="font-bold text-sm md:text-base">{item}</p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </section>
-              ))}
-              <footer className="p-6 md:p-8 text-center text-[10px] md:text-xs text-black/40 border-t border-black/5">
-                Feito com Inabalável💔
-              </footer>
-            </div>
+            {content.html ? (
+              <iframe 
+                srcDoc={content.html} 
+                title="Preview" 
+                className="w-full h-full border-0 bg-white"
+                sandbox="allow-scripts allow-same-origin"
+              />
+            ) : (
+              <div className="min-h-full font-sans">
+                {content.sections?.map((section: any) => (
+                  <section key={section.id} className={`p-6 md:p-12 ${section.type === 'hero' ? 'bg-black text-white' : 'bg-white text-black'}`}>
+                    <h2 className={`text-2xl md:text-4xl font-black tracking-tighter mb-4 ${section.type === 'hero' ? 'text-3xl md:text-6xl' : ''}`}>
+                      {section.title}
+                    </h2>
+                    <p className={`text-sm md:text-lg leading-relaxed ${section.type === 'hero' ? 'text-white/60' : 'text-black/60'}`}>
+                      {section.content}
+                    </p>
+                    {section.items && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-8 md:mt-12">
+                        {section.items.map((item: string, i: number) => (
+                          <div key={i} className={`p-4 md:p-6 rounded-2xl border ${section.type === 'hero' ? 'bg-white/5 border-white/10' : 'bg-black/5 border-black/10'}`}>
+                            <p className="font-bold text-sm md:text-base">{item}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </section>
+                ))}
+                <footer className="p-6 md:p-8 text-center text-[10px] md:text-xs text-black/40 border-t border-black/5">
+                  Feito com Inabalável💔
+                </footer>
+              </div>
+            )}
           </div>
+
+          {/* Floating Prompt Input */}
+          {content.html && (
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-full max-w-2xl px-4">
+              <form 
+                onSubmit={handleModify}
+                className="bg-[#0a0a0a] border border-white/10 rounded-2xl p-2 flex items-center gap-2 shadow-2xl shadow-black/50 backdrop-blur-xl"
+              >
+                <input
+                  type="text"
+                  value={promptInput}
+                  onChange={(e) => setPromptInput(e.target.value)}
+                  placeholder="Peça para a IA alterar algo (ex: Mude a cor do botão para azul)..."
+                  className="flex-1 bg-transparent border-none text-white text-sm px-4 py-2 focus:outline-none placeholder:text-white/30"
+                  disabled={isGenerating}
+                />
+                <button
+                  type="submit"
+                  disabled={!promptInput.trim() || isGenerating}
+                  className="p-3 bg-white text-black rounded-xl hover:bg-white/90 transition-all disabled:opacity-50 disabled:hover:bg-white flex items-center justify-center"
+                >
+                  {isGenerating ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
+                </button>
+              </form>
+            </div>
+          )}
         </main>
       </div>
 

@@ -55,7 +55,7 @@ service cloud.firestore {
     // ===============================================================
     // Rules
     // ===============================================================
-    match /settings/{settingId} {
+    match /settings/global {
       allow read: if true;
       allow write: if isAdmin();
     }

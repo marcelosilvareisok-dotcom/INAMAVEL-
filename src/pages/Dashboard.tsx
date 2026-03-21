@@ -42,7 +42,7 @@ export default function Dashboard() {
         setFreeMode(docSnap.data().freeMode || false);
       }
     }, (error) => {
-      console.error("Error listening to settings:", error);
+      console.error("Error listening to settings:", error.code, error.message);
     });
     return () => unsubscribe();
   }, []);

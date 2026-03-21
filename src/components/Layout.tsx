@@ -14,6 +14,7 @@ import {
 import { auth } from '../firebase';
 import { signOut } from 'firebase/auth';
 import { motion, AnimatePresence } from 'motion/react';
+import Footer from './Footer';
 import { cn } from '../utils';
 
 interface LayoutProps {
@@ -179,6 +180,7 @@ export default function Layout({ children, user, coins }: LayoutProps) {
         <main className="flex-1 lg:ml-64 min-h-[calc(100vh-64px)] p-4 lg:p-8">
           <div className="max-w-5xl mx-auto">
             {children}
+            <Footer />
           </div>
         </main>
       </div>

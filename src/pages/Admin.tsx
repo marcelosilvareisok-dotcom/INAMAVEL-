@@ -259,24 +259,6 @@ export default function Admin() {
               </div>
             </div>
           )}
-          
-          <div className="pt-4 border-t border-white/10">
-            <span className="text-xs font-medium text-white/40 uppercase tracking-widest mb-2 block">Sugestões</span>
-            <div className="grid grid-cols-5 gap-2">
-              {['Inabalavel', 'Amor', 'Coracao', 'Quebrado', 'Forte', 'Luz', 'Sombra', 'Guerreiro', 'Fenix', 'Dragao'].map((seed, index) => {
-                const url = `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}`;
-                return (
-                  <button 
-                    key={index}
-                    onClick={() => updateIconUrl(url)}
-                    className="w-full aspect-square bg-white/5 rounded-lg overflow-hidden border border-white/10 hover:border-blue-500 transition-colors"
-                  >
-                    <img src={url} alt={`Suggested Icon ${seed}`} className="w-full h-full object-cover" />
-                  </button>
-                );
-              })}
-            </div>
-          </div>
         </div>
       </div>
 

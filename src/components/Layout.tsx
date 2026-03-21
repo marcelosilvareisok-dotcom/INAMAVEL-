@@ -8,7 +8,8 @@ import {
   LogOut, 
   Menu,
   X,
-  ShieldCheck
+  ShieldCheck,
+  MessageCircle
 } from 'lucide-react';
 import { auth } from '../firebase';
 import { signOut } from 'firebase/auth';
@@ -39,6 +40,11 @@ export default function Layout({ children, user, coins }: LayoutProps) {
   }
 
   const handleLogout = () => signOut(auth);
+
+  const handleWhatsAppShare = () => {
+    const text = encodeURIComponent("Conheça o Inabalável, a melhor plataforma de desenvolvimento de software com IA do mundo! 🚀\n\nAcesse agora: " + window.location.origin);
+    window.open(`https://wa.me/?text=${text}`, '_blank');
+  };
 
   return (
     <div className="min-h-screen bg-[#000000] text-white font-sans selection:bg-white/30">
@@ -112,6 +118,14 @@ export default function Layout({ children, user, coins }: LayoutProps) {
                 <span>{item.name}</span>
               </Link>
             ))}
+
+            <button
+              onClick={handleWhatsAppShare}
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-md transition-all duration-200 group text-sm hover:bg-green-500/10 text-green-500/80 hover:text-green-500 mt-4 border border-green-500/20"
+            >
+              <MessageCircle size={16} className="transition-transform group-hover:scale-110" />
+              <span className="font-medium">Compartilhar no WhatsApp</span>
+            </button>
           </div>
           
           <div className="mt-auto p-4 border-t border-white/10">
@@ -162,6 +176,17 @@ export default function Layout({ children, user, coins }: LayoutProps) {
                       <span>{item.name}</span>
                     </Link>
                   ))}
+
+                  <button
+                    onClick={() => {
+                      handleWhatsAppShare();
+                      setIsSidebarOpen(false);
+                    }}
+                    className="w-full flex items-center gap-3 px-3 py-2 rounded-md transition-all duration-200 group text-sm hover:bg-green-500/10 text-green-500/80 hover:text-green-500 mt-4 border border-green-500/20"
+                  >
+                    <MessageCircle size={16} />
+                    <span className="font-medium">Compartilhar no WhatsApp</span>
+                  </button>
                 </div>
               </motion.aside>
             </>

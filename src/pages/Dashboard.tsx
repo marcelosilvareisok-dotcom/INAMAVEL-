@@ -19,7 +19,8 @@ import {
   Sparkles,
   ArrowRight,
   Monitor,
-  Share2
+  Share2,
+  MessageCircle
 } from 'lucide-react';
 import ShareModal from '../components/ShareModal';
 
@@ -108,6 +109,11 @@ export default function Dashboard() {
     navigate('/new', { state: { initialPrompt: prompt } });
   };
 
+  const handleWhatsAppShare = () => {
+    const text = encodeURIComponent("Conheça o Inabalável, a melhor plataforma de desenvolvimento de software com IA do mundo! 🚀\n\nAcesse agora: " + window.location.origin);
+    window.open(`https://wa.me/?text=${text}`, '_blank');
+  };
+
   return (
     <div className="space-y-10 pb-20 max-w-4xl mx-auto">
       <AnimatePresence>
@@ -146,6 +152,15 @@ export default function Dashboard() {
 
       {/* Hero / Create Section */}
       <div className="flex flex-col items-center justify-center pt-12 pb-8 text-center space-y-6">
+        <button 
+          onClick={handleWhatsAppShare}
+          className="inline-flex items-center gap-2 px-4 py-2 bg-[#25D366]/10 border border-[#25D366]/20 hover:bg-[#25D366]/20 hover:border-[#25D366]/40 rounded-full mb-2 transition-all group"
+        >
+          <MessageCircle size={14} className="text-[#25D366] group-hover:scale-110 transition-transform" />
+          <span className="text-[10px] font-bold text-[#25D366] uppercase tracking-wider">
+            Compartilhar App no WhatsApp
+          </span>
+        </button>
         <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-white">
           O que você quer construir?
         </h1>

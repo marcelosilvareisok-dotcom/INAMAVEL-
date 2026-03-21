@@ -29,7 +29,7 @@ export default function About() {
         <div className="relative">
           <div className="aspect-square rounded-[40px] overflow-hidden border-2 border-purple-500/30 p-2">
             <img 
-              src="https://i.imgur.com/e7EnlHN.jpg" 
+              src="https://i.postimg.cc/zG1LL3wq/MVIMG-20260320-144426.jpg" 
               alt="Marcelo da Silva Reis" 
               className="w-full h-full object-cover rounded-[32px] bg-gradient-to-br from-purple-600 to-red-600"
               referrerPolicy="no-referrer"

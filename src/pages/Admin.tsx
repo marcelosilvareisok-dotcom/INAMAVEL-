@@ -19,6 +19,7 @@ export default function Admin() {
   const [updating, setUpdating] = React.useState<string | null>(null);
   const [freeMode, setFreeMode] = React.useState(false);
   const [iconUrl, setIconUrl] = React.useState('');
+  const [iconHistory, setIconHistory] = React.useState<string[]>([]);
   const [updatingSettings, setUpdatingSettings] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [success, setSuccess] = React.useState<string | null>(null);
@@ -27,8 +28,10 @@ export default function Admin() {
     const docRef = doc(db, 'settings', 'global');
     const unsubscribe = onSnapshot(docRef, (docSnap) => {
       if (docSnap.exists()) {
-        setFreeMode(docSnap.data().freeMode || false);
-        setIconUrl(docSnap.data().iconUrl || 'https://api.dicebear.com/7.x/avataaars/svg?seed=Inabalavel');
+        const data = docSnap.data();
+        setFreeMode(data.freeMode || false);
+        setIconUrl(data.iconUrl || 'https://api.dicebear.com/7.x/avataaars/svg?seed=Inabalavel');
+        setIconHistory(data.iconHistory || []);
       }
     }, (error) => {
       console.error("Error listening to settings:", error);
@@ -84,15 +87,23 @@ export default function Admin() {
     }
   };
 
-  const updateIconUrl = async () => {
+  const updateIconUrl = async (newIconUrl: string = iconUrl) => {
     setUpdatingSettings(true);
     setError(null);
     setSuccess(null);
     try {
       // Update Firestore
       const docRef = doc(db, 'settings', 'global');
+      const docSnap = await getDocFromServer(docRef);
+      const currentHistory = docSnap.exists() ? (docSnap.data().iconHistory || []) : [];
+      
+      const newHistory = currentHistory.includes(newIconUrl) 
+        ? currentHistory 
+        : [newIconUrl, ...currentHistory].slice(0, 10); // Keep last 10
+
       await setDoc(docRef, {
-        iconUrl: iconUrl,
+        iconUrl: newIconUrl,
+        iconHistory: newHistory,
         updatedAt: new Date().toISOString()
       }, { merge: true });
 
@@ -100,11 +111,12 @@ export default function Admin() {
       const response = await fetch('/api/update-icon', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ iconUrl })
+        body: JSON.stringify({ iconUrl: newIconUrl })
       });
       
       if (!response.ok) throw new Error('Falha ao atualizar o ícone no servidor.');
 
+      setIconUrl(newIconUrl);
       setSuccess("Ícone atualizado com sucesso!");
       setTimeout(() => setSuccess(null), 3000);
     } catch (error: any) {
@@ -224,12 +236,29 @@ export default function Admin() {
             className="w-full bg-white/5 border border-white/10 rounded-xl p-2 text-sm"
           />
           <button 
-            onClick={updateIconUrl}
+            onClick={() => updateIconUrl()}
             disabled={updatingSettings}
             className="w-full py-2 bg-blue-500 text-white rounded-xl font-bold hover:bg-blue-600 transition-colors"
           >
             Atualizar Ícone
           </button>
+          
+          {iconHistory.length > 0 && (
+            <div className="pt-4 border-t border-white/10">
+              <span className="text-xs font-medium text-white/40 uppercase tracking-widest mb-2 block">Histórico</span>
+              <div className="grid grid-cols-5 gap-2">
+                {iconHistory.map((url, index) => (
+                  <button 
+                    key={index}
+                    onClick={() => updateIconUrl(url)}
+                    className="w-full aspect-square bg-white/5 rounded-lg overflow-hidden border border-white/10 hover:border-blue-500 transition-colors"
+                  >
+                    <img src={url} alt="Icon History" className="w-full h-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

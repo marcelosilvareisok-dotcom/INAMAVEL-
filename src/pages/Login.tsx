@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { auth, googleProvider, db } from '../firebase';
-import { signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
+import { signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { handleFirestoreError, OperationType } from '../utils/firestore-errors';
 import { motion } from 'motion/react';
@@ -13,6 +13,7 @@ export default function Login() {
   const [password, setPassword] = React.useState('');
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState('');
+  const [message, setMessage] = React.useState('');
   const navigate = useNavigate();
 
   const translateError = (message: string) => {
@@ -25,7 +26,26 @@ export default function Login() {
     if (message.includes('auth/popup-closed-by-user')) return 'O login foi cancelado.';
     if (message.includes('auth/unauthorized-domain')) return 'Domínio não autorizado no Firebase.';
     if (message.includes('auth/operation-not-allowed')) return 'O login por email/senha não está ativado no Firebase Console.';
+    if (message.includes('auth/user-not-found')) return 'Usuário não encontrado.';
     return 'Ocorreu um erro. Tente novamente.';
+  };
+
+  const handleForgotPassword = async () => {
+    if (!email) {
+      setError('Por favor, digite seu email primeiro.');
+      return;
+    }
+    setLoading(true);
+    setError('');
+    setMessage('');
+    try {
+      await sendPasswordResetEmail(auth, email);
+      setMessage('Email de recuperação enviado! Verifique sua caixa de entrada.');
+    } catch (err: any) {
+      setError(translateError(err.message));
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleAuthSuccess = async (user: any) => {
@@ -151,7 +171,11 @@ export default function Login() {
                 <span className="text-white/40 group-hover:text-white/60 transition-colors">Lembrar acesso</span>
               </label>
               {isLogin && (
-                <button type="button" className="text-purple-400 hover:text-purple-300 transition-colors font-medium">
+                <button 
+                  type="button" 
+                  onClick={handleForgotPassword}
+                  className="text-purple-400 hover:text-purple-300 transition-colors font-medium"
+                >
                   Esqueceu a senha?
                 </button>
               )}
@@ -160,6 +184,12 @@ export default function Login() {
             {error && (
               <p className="text-red-500 text-sm font-medium bg-red-500/10 p-3 rounded-lg border border-red-500/20">
                 {error}
+              </p>
+            )}
+
+            {message && (
+              <p className="text-emerald-500 text-sm font-medium bg-emerald-500/10 p-3 rounded-lg border border-emerald-500/20">
+                {message}
               </p>
             )}
 

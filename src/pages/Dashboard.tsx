@@ -18,8 +18,10 @@ import {
   Coins,
   Sparkles,
   ArrowRight,
-  Monitor
+  Monitor,
+  Share2
 } from 'lucide-react';
+import ShareModal from '../components/ShareModal';
 
 export default function Dashboard() {
   const [projects, setProjects] = React.useState<Project[]>([]);
@@ -27,6 +29,7 @@ export default function Dashboard() {
   const [searchTerm, setSearchTerm] = React.useState('');
   const [prompt, setPrompt] = React.useState('');
   const [showPaymentSuccess, setShowPaymentSuccess] = React.useState<{ coins: number } | null>(null);
+  const [shareProject, setShareProject] = React.useState<{ url: string; name: string } | null>(null);
   const navigate = useNavigate();
 
   React.useEffect(() => {
@@ -218,16 +221,31 @@ export default function Dashboard() {
                     {/* Quick Actions Overlay */}
                     <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       {project.status === 'published' && (
-                        <a
-                          href={`/p/${project.slug}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          onClick={(e) => e.stopPropagation()}
-                          className="p-1.5 bg-black/50 backdrop-blur-sm text-white/70 hover:text-white rounded-md border border-white/10 transition-colors"
-                          title="Ver Site"
-                        >
-                          <ExternalLink size={14} />
-                        </a>
+                        <>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setShareProject({
+                                url: `${window.location.origin}/p/${project.slug}`,
+                                name: project.name
+                              });
+                            }}
+                            className="p-1.5 bg-black/50 backdrop-blur-sm text-white/70 hover:text-white rounded-md border border-white/10 transition-colors"
+                            title="Compartilhar"
+                          >
+                            <Share2 size={14} />
+                          </button>
+                          <a
+                            href={`/p/${project.slug}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className="p-1.5 bg-black/50 backdrop-blur-sm text-white/70 hover:text-white rounded-md border border-white/10 transition-colors"
+                            title="Ver Site"
+                          >
+                            <ExternalLink size={14} />
+                          </a>
+                        </>
                       )}
                     </div>
                   </div>
@@ -250,15 +268,33 @@ export default function Dashboard() {
                         <Clock size={12} />
                         {new Date(project.updatedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                       </div>
-                      <button 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          // Handle delete logic here or open a modal
-                        }}
-                        className="text-white/20 hover:text-red-400 transition-colors"
-                      >
-                        <Trash2 size={14} />
-                      </button>
+                      <div className="flex items-center gap-2">
+                        {project.status === 'published' && (
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setShareProject({
+                                url: `${window.location.origin}/p/${project.slug}`,
+                                name: project.name
+                              });
+                            }}
+                            className="text-white/20 hover:text-blue-400 transition-colors"
+                            title="Compartilhar"
+                          >
+                            <Share2 size={14} />
+                          </button>
+                        )}
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            // Handle delete logic here or open a modal
+                          }}
+                          className="text-white/20 hover:text-red-400 transition-colors"
+                          title="Excluir"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </motion.div>
@@ -275,6 +311,15 @@ export default function Dashboard() {
           </div>
         )}
       </div>
+
+      {shareProject && (
+        <ShareModal
+          isOpen={!!shareProject}
+          onClose={() => setShareProject(null)}
+          projectUrl={shareProject.url}
+          projectName={shareProject.name}
+        />
+      )}
     </div>
   );
 }

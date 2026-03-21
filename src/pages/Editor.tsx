@@ -416,8 +416,28 @@ export default function Editor() {
         <PublishModal 
           isOpen={showPublishModal} 
           onClose={() => setShowPublishModal(false)} 
-          project={project}
-          onPublishSuccess={() => {
+          projectName={project.name}
+          onPublish={async (config) => {
+            const response = await fetch('/api/publish', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                githubToken: config.githubToken,
+                repoOwner: config.repoOwner,
+                repoName: config.repoName,
+                files: [{ path: 'index.html', content: project.content }],
+                commitMessage: `Publicação do projeto ${project.name}`
+              })
+            });
+
+            if (!response.ok) {
+              const data = await response.json();
+              throw new Error(data.error || 'Erro ao publicar');
+            }
+
+            // Update project status in Firestore
+            const projectRef = doc(db, 'projects', project.id);
+            await updateDoc(projectRef, { status: 'published' });
             setProject({ ...project, status: 'published' });
           }}
         />

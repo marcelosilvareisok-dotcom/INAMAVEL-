@@ -23,6 +23,7 @@ import {
   MessageCircle
 } from 'lucide-react';
 import ShareModal from '../components/ShareModal';
+import PublishModal from '../components/PublishModal';
 
 export default function Dashboard() {
   const [projects, setProjects] = React.useState<Project[]>([]);
@@ -31,7 +32,33 @@ export default function Dashboard() {
   const [prompt, setPrompt] = React.useState('');
   const [showPaymentSuccess, setShowPaymentSuccess] = React.useState<{ coins: number } | null>(null);
   const [shareProject, setShareProject] = React.useState<{ url: string; name: string } | null>(null);
+  const [publishProject, setPublishProject] = React.useState<Project | null>(null);
   const navigate = useNavigate();
+
+  const handlePublish = async (config: { githubToken: string; repoOwner: string; repoName: string }) => {
+    if (!publishProject) return;
+
+    const response = await fetch('/api/publish', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        githubToken: config.githubToken,
+        repoOwner: config.repoOwner,
+        repoName: config.repoName,
+        files: [{ path: 'index.html', content: publishProject.content }],
+        commitMessage: `Publicação do projeto ${publishProject.name}`
+      })
+    });
+
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.error || 'Erro ao publicar');
+    }
+
+    // Update project status in Firestore
+    const projectRef = doc(db, 'projects', publishProject.id);
+    await updateDoc(projectRef, { status: 'published' });
+  };
 
   React.useEffect(() => {
     // Handle payment success from Mercado Pago
@@ -288,8 +315,7 @@ export default function Dashboard() {
                           <button 
                             onClick={(e) => {
                               e.stopPropagation();
-                              // TODO: Implement publish logic
-                              console.log("Publicar projeto:", project.id);
+                              setPublishProject(project);
                             }}
                             className="text-white/20 hover:text-green-400 transition-colors"
                             title="Publicar"
@@ -346,6 +372,15 @@ export default function Dashboard() {
           onClose={() => setShareProject(null)}
           projectUrl={shareProject.url}
           projectName={shareProject.name}
+        />
+      )}
+
+      {publishProject && (
+        <PublishModal
+          isOpen={!!publishProject}
+          onClose={() => setPublishProject(null)}
+          onPublish={handlePublish}
+          projectName={publishProject.name}
         />
       )}
     </div>

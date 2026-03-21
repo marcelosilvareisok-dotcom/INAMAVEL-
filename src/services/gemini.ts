@@ -30,7 +30,7 @@ export async function generateProjectContent(name: string, type: string, objecti
 
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-3.1-pro-preview",
+      model: "gemini-3-flash-preview",
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -68,8 +68,11 @@ export async function generateProjectContent(name: string, type: string, objecti
     });
 
     return JSON.parse(response.text || "{}");
-  } catch (error) {
+  } catch (error: any) {
     console.error("Erro ao gerar conteúdo com Gemini:", error);
+    if (error?.message?.includes('429') || error?.status === 'RESOURCE_EXHAUSTED' || error?.message?.includes('Quota exceeded')) {
+      throw new Error("O limite de requisições da inteligência artificial foi atingido. Por favor, aguarde cerca de 1 minuto e tente novamente.");
+    }
     throw error;
   }
 }

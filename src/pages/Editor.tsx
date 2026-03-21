@@ -379,10 +379,16 @@ export default function Editor() {
 
           {/* Floating Prompt Input */}
           {content.html && (
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-full max-w-2xl px-4">
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-full max-w-2xl px-4 flex flex-col items-center gap-3">
+              <div className="flex items-center gap-2 px-4 py-2 bg-black/60 border border-white/10 rounded-full backdrop-blur-md shadow-2xl">
+                <Sparkles size={14} className="text-purple-400" />
+                <span className="text-[10px] font-bold text-white/80 uppercase tracking-wider">
+                  Melhores engenheiros do mundo no desenvolvimento de software
+                </span>
+              </div>
               <form 
                 onSubmit={handleModify}
-                className="bg-[#0a0a0a] border border-white/10 rounded-2xl p-2 flex items-center gap-2 shadow-2xl shadow-black/50 backdrop-blur-xl"
+                className="w-full bg-[#0a0a0a] border border-white/10 rounded-2xl p-2 flex items-center gap-2 shadow-2xl shadow-black/50 backdrop-blur-xl"
               >
                 <input
                   type="text"

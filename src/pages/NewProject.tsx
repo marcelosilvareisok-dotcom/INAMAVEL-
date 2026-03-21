@@ -152,6 +152,12 @@ export default function NewProject() {
           className="space-y-8"
         >
           <div className="text-center space-y-3 mb-12">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-full mb-2">
+              <Sparkles size={14} className="text-purple-400" />
+              <span className="text-[10px] font-bold text-white/80 uppercase tracking-wider">
+                Melhores engenheiros do mundo no desenvolvimento de software
+              </span>
+            </div>
             <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-white">
               Detalhes do Projeto
             </h1>

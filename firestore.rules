@@ -31,7 +31,7 @@ service cloud.firestore {
     // ===============================================================
     function isValidUser(data) {
       return data.uid is string &&
-             data.email is string && isValidEmail(data.email) &&
+             data.email is string && data.email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$") &&
              data.coins is number && data.coins >= 0 &&
              data.role in ['user', 'admin'];
     }

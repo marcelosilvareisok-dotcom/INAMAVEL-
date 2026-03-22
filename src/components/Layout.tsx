@@ -200,6 +200,11 @@ export default function Layout({ children, user, coins }: LayoutProps) {
         {/* Main Content */}
         <main className="flex-1 lg:ml-64 min-h-[calc(100vh-56px)] p-4 lg:p-8">
           <div className="max-w-5xl mx-auto">
+            <div className="mb-6 p-4 bg-white/5 border border-white/10 rounded-xl text-center text-sm text-white/80 font-mono">
+              Aviso serviço em desenvolvimento de ajuste FINO.(INICIO)
+              ESTAMOS CONTRATANDO FUNDADORES.
+              SEJA CURSIOSO...❤️💔🙀
+            </div>
             <AnimatePresence mode="wait">
               <motion.div
                 key={location.pathname}

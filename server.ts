@@ -260,9 +260,8 @@ app.post("/api/paypal/capture-order", async (req, res) => {
 });
 
 const startServer = async () => {
-  // Force Vite in development mode for debugging
-  const isDev = true; // process.env.NODE_ENV !== "production" && !process.env.VERCEL;
-  console.log(`Server environment: NODE_ENV=${process.env.NODE_ENV}, VERCEL=${process.env.VERCEL}, isDev=${isDev}`);
+  const isDev = process.env.NODE_ENV !== "production";
+  console.log(`Server environment: NODE_ENV=${process.env.NODE_ENV}, isDev=${isDev}`);
 
   if (isDev) {
     console.log("Starting server in DEVELOPMENT mode with Vite middleware");
@@ -272,10 +271,14 @@ const startServer = async () => {
       appType: "spa",
     });
     app.use(vite.middlewares);
-  } else if (!process.env.VERCEL) {
+  } else {
     console.log("Starting server in PRODUCTION mode (static serving)");
     const distPath = path.join(process.cwd(), 'dist');
+    
+    // Serve static files from dist
     app.use(express.static(distPath));
+    
+    // Handle SPA routing - serve index.html for all non-API routes
     app.get('*', (req, res) => {
       res.sendFile(path.join(distPath, 'index.html'));
     });

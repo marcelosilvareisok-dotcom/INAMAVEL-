@@ -174,6 +174,12 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-10 pb-20 max-w-4xl mx-auto">
+      <div className="flex justify-center pt-4">
+        <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] text-white/30 uppercase tracking-widest">
+          <span className="w-1.5 h-1.5 rounded-full bg-yellow-500/50 animate-pulse"></span>
+          Em fase de produção
+        </span>
+      </div>
       <Tutorial 
         steps={tutorialSteps} 
         run={runTutorial} 

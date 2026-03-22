@@ -55,24 +55,16 @@ export default function Login() {
 
   const handleAuthSuccess = async (user: any, isGoogle: boolean = false) => {
     try {
-      // Call backend to initialize user
-      const response = await fetch('/api/auth/init-user', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          uid: user.uid,
-          email: user.email,
-          displayName: user.displayName || email.split('@')[0],
-          photoURL: user.photoURL || ''
-        })
-      });
-
-      if (!response.ok) throw new Error('Falha ao inicializar usuário');
-
-      navigate('/dashboard');
+      const userDoc = await getDoc(doc(db, 'users', user.uid));
+      if (!userDoc.exists()) {
+        setPendingUser(user);
+        setShowRegistration(true);
+      } else {
+        navigate('/dashboard');
+      }
     } catch (error) {
-      console.error('Error initializing user:', error);
-      setError('Erro ao inicializar usuário.');
+      console.error('Error checking user:', error);
+      setError('Erro ao verificar usuário.');
     }
   };
 
@@ -81,7 +73,7 @@ export default function Login() {
       await setDoc(doc(db, 'users', pendingUser.uid), {
         uid: pendingUser.uid,
         email: pendingUser.email,
-        displayName: pendingUser.displayName,
+        displayName: pendingUser.displayName || pendingUser.email.split('@')[0],
         photoURL: pendingUser.photoURL || '',
         coins: 100,
         createdAt: serverTimestamp(),
@@ -92,6 +84,8 @@ export default function Login() {
       setShowRegistration(false);
       navigate('/dashboard');
     } catch (error) {
+      console.error('Error registering user:', error);
+      setError('Erro ao concluir o cadastro.');
       handleFirestoreError(error, OperationType.WRITE, 'users');
     }
   };
@@ -295,7 +289,7 @@ export default function Login() {
       </motion.div>
       <RegistrationModal 
         isOpen={showRegistration} 
-        onClose={() => setShowRegistration(false)} 
+        onClose={() => handleRegistrationSubmit({ phone: '', objective: '' })} 
         onSubmit={handleRegistrationSubmit}
       />
     </div>

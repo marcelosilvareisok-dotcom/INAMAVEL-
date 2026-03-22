@@ -4,17 +4,8 @@ import fs from 'fs';
 import { MercadoPagoConfig, Preference } from 'mercadopago';
 import dotenv from 'dotenv';
 import { Octokit } from "octokit";
-import { initializeApp, cert } from 'firebase-admin/app';
-import { getFirestore } from 'firebase-admin/firestore';
 
 dotenv.config();
-
-// Initialize Firebase Admin
-const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY || '{}');
-initializeApp({
-  credential: cert(serviceAccount)
-});
-const db = getFirestore();
 
 const app = express();
 const PORT = 3000;
@@ -22,28 +13,6 @@ const PORT = 3000;
 app.use(express.json({ limit: '10mb' }));
 
 // API Routes
-app.post("/api/auth/init-user", async (req, res) => {
-  const { uid, email, displayName, photoURL } = req.body;
-  try {
-    const userRef = db.collection('users').doc(uid);
-    const userDoc = await userRef.get();
-    if (!userDoc.exists) {
-      await userRef.set({
-        uid,
-        email,
-        displayName,
-        photoURL,
-        coins: 100,
-        createdAt: new Date(),
-        role: 'user'
-      });
-    }
-    res.json({ success: true });
-  } catch (error: any) {
-    console.error('Error initializing user:', error);
-    res.status(500).json({ error: 'Erro ao inicializar usuário' });
-  }
-});
 app.post("/api/publish", async (req, res) => {
   const { githubToken, repoOwner, repoName, files, commitMessage } = req.body;
 

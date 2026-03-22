@@ -6,6 +6,7 @@ import { Project } from '../types';
 import { handleFirestoreError, OperationType } from '../utils/firestore-errors';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../utils';
+import Tutorial from '../components/Tutorial';
 import { 
   Plus, 
   Search, 
@@ -34,7 +35,26 @@ export default function Dashboard() {
   const [shareProject, setShareProject] = React.useState<{ url: string; name: string } | null>(null);
   const [publishProject, setPublishProject] = React.useState<Project | null>(null);
   const [deleteProject, setDeleteProject] = React.useState<Project | null>(null);
+  const [runTutorial, setRunTutorial] = React.useState(false);
   const navigate = useNavigate();
+
+  React.useEffect(() => {
+    const hasSeenTutorial = localStorage.getItem('has_seen_dashboard_tutorial');
+    if (!hasSeenTutorial) {
+      setRunTutorial(true);
+    }
+  }, []);
+
+  const tutorialSteps = [
+    {
+      target: '.create-project-input',
+      content: 'Digite aqui o que você quer construir e a IA criará o projeto para você!',
+    },
+    {
+      target: '.projects-list',
+      content: 'Aqui você encontrará todos os seus projetos criados.',
+    },
+  ];
 
   const handleDelete = async () => {
     if (!deleteProject) return;
@@ -154,6 +174,14 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-10 pb-20 max-w-4xl mx-auto">
+      <Tutorial 
+        steps={tutorialSteps} 
+        run={runTutorial} 
+        onClose={() => {
+          setRunTutorial(false);
+          localStorage.setItem('has_seen_dashboard_tutorial', 'true');
+        }} 
+      />
       <AnimatePresence>
         {showPaymentSuccess && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
@@ -217,7 +245,7 @@ export default function Dashboard() {
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               placeholder="Ex: Uma landing page para uma agência de marketing digital..."
-              className="w-full bg-transparent border-none py-4 pl-3 pr-4 text-sm text-white placeholder:text-white/30 focus:outline-none focus:ring-0"
+              className="create-project-input w-full bg-transparent border-none py-4 pl-3 pr-4 text-sm text-white placeholder:text-white/30 focus:outline-none focus:ring-0"
             />
             <div className="pr-2">
               <button
@@ -233,7 +261,7 @@ export default function Dashboard() {
       </div>
 
       {/* Projects Section */}
-      <div className="space-y-6">
+      <div className="projects-list space-y-6">
         <div className="flex items-center justify-between border-b border-white/10 pb-4">
           <h2 className="text-lg font-medium text-white">Projetos Recentes</h2>
           

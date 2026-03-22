@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import MonacoEditor from '@monaco-editor/react';
 import Logo from '../components/Logo';
 import PublishModal from '../components/PublishModal';
+import Tutorial from '../components/Tutorial';
 import { 
   Save, 
   Globe, 
@@ -41,7 +42,30 @@ export default function Editor() {
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
   const [promptInput, setPromptInput] = React.useState('');
   const [isGenerating, setIsGenerating] = React.useState(false);
+  const [runTutorial, setRunTutorial] = React.useState(false);
   const navigate = useNavigate();
+
+  React.useEffect(() => {
+    const hasSeenTutorial = localStorage.getItem('has_seen_editor_tutorial');
+    if (!hasSeenTutorial) {
+      setRunTutorial(true);
+    }
+  }, []);
+
+  const tutorialSteps = [
+    {
+      target: '.editor-preview',
+      content: 'Aqui você vê o preview do seu projeto em tempo real.',
+    },
+    {
+      target: '.editor-code',
+      content: 'Aqui você pode editar o código fonte do seu projeto.',
+    },
+    {
+      target: '.editor-prompt',
+      content: 'Peça para a IA fazer alterações no seu projeto aqui.',
+    },
+  ];
 
   // Remember last project
   React.useEffect(() => {
@@ -177,6 +201,14 @@ export default function Editor() {
 
   return (
     <div className="h-screen flex flex-col bg-[#050505] overflow-hidden">
+      <Tutorial 
+        steps={tutorialSteps} 
+        run={runTutorial} 
+        onClose={() => {
+          setRunTutorial(false);
+          localStorage.setItem('has_seen_editor_tutorial', 'true');
+        }} 
+      />
       {/* Editor Header */}
       <header className="h-16 border-b border-white/5 bg-[#050505] flex items-center justify-between px-2 md:px-4 z-50">
         <div className="flex items-center gap-2 md:gap-4">
@@ -304,7 +336,7 @@ export default function Editor() {
             {activeTab === 'design' && (
               <div className="space-y-4 h-full flex flex-col">
                 <p className="text-xs font-bold text-white/40 uppercase tracking-widest">Código Fonte</p>
-                <div className="flex-1 bg-black/50 border border-white/10 rounded-2xl overflow-hidden relative">
+                <div className="editor-code flex-1 bg-black/50 border border-white/10 rounded-2xl overflow-hidden relative">
                   <MonacoEditor 
                     height="100%"
                     language="html"
@@ -355,7 +387,7 @@ export default function Editor() {
             )}
           </AnimatePresence>
 
-          <div className={`bg-white text-black transition-all duration-500 shadow-2xl overflow-hidden rounded-2xl h-[calc(100vh-12rem)] ${
+          <div className={`editor-preview bg-white text-black transition-all duration-500 shadow-2xl overflow-hidden rounded-2xl h-[calc(100vh-12rem)] ${
             viewMode === 'desktop' ? 'w-full max-w-6xl' : 'w-full max-w-[375px]'
           }`}>
             {content.html ? (
@@ -404,7 +436,7 @@ export default function Editor() {
               </div>
               <form 
                 onSubmit={handleModify}
-                className="w-full bg-[#0a0a0a] border border-white/10 rounded-2xl p-2 flex items-center gap-2 shadow-2xl shadow-black/50 backdrop-blur-xl"
+                className="editor-prompt w-full bg-[#0a0a0a] border border-white/10 rounded-2xl p-2 flex items-center gap-2 shadow-2xl shadow-black/50 backdrop-blur-xl"
               >
                 <input
                   type="text"

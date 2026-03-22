@@ -6,6 +6,7 @@ import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { handleFirestoreError, OperationType } from '../utils/firestore-errors';
 import { motion } from 'motion/react';
 import { Heart, Mail, Lock, Chrome, Github, ArrowRight, Sparkles, Eye, EyeOff } from 'lucide-react';
+import RegistrationModal from '../components/RegistrationModal';
 
 export default function Login() {
   const [isLogin, setIsLogin] = React.useState(true);
@@ -15,6 +16,8 @@ export default function Login() {
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState('');
   const [message, setMessage] = React.useState('');
+  const [showRegistration, setShowRegistration] = React.useState(false);
+  const [pendingUser, setPendingUser] = React.useState<any>(null);
   const navigate = useNavigate();
 
   const translateError = (message: string) => {
@@ -50,22 +53,47 @@ export default function Login() {
     }
   };
 
-  const handleAuthSuccess = async (user: any) => {
+  const handleAuthSuccess = async (user: any, isGoogle: boolean = false) => {
     try {
       const userRef = doc(db, 'users', user.uid);
       const userDoc = await getDoc(userRef);
 
       if (!userDoc.exists()) {
+        if (isGoogle && isLogin) {
+          setPendingUser(user);
+          setShowRegistration(true);
+          return;
+        }
         await setDoc(userRef, {
           uid: user.uid,
           email: user.email,
           displayName: user.displayName || email.split('@')[0],
           photoURL: user.photoURL || '',
-          coins: 100, // Welcome bonus increased
+          coins: 100,
           createdAt: serverTimestamp(),
           role: 'user'
         });
       }
+      navigate('/dashboard');
+    } catch (error) {
+      handleFirestoreError(error, OperationType.WRITE, 'users');
+    }
+  };
+
+  const handleRegistrationSubmit = async (data: { phone: string; objective: string }) => {
+    try {
+      await setDoc(doc(db, 'users', pendingUser.uid), {
+        uid: pendingUser.uid,
+        email: pendingUser.email,
+        displayName: pendingUser.displayName,
+        photoURL: pendingUser.photoURL || '',
+        coins: 100,
+        createdAt: serverTimestamp(),
+        role: 'user',
+        phone: data.phone,
+        objective: data.objective
+      });
+      setShowRegistration(false);
       navigate('/dashboard');
     } catch (error) {
       handleFirestoreError(error, OperationType.WRITE, 'users');
@@ -77,7 +105,7 @@ export default function Login() {
     setError('');
     try {
       const result = await signInWithPopup(auth, googleProvider);
-      await handleAuthSuccess(result.user);
+      await handleAuthSuccess(result.user, true);
     } catch (err: any) {
       setError(translateError(err.message));
     } finally {
@@ -269,6 +297,11 @@ export default function Login() {
           Powered by Gemini AI
         </div>
       </motion.div>
+      <RegistrationModal 
+        isOpen={showRegistration} 
+        onClose={() => setShowRegistration(false)} 
+        onSubmit={handleRegistrationSubmit}
+      />
     </div>
   );
 }

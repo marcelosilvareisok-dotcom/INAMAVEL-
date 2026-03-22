@@ -4,13 +4,60 @@ import fs from 'fs';
 import { MercadoPagoConfig, Preference } from 'mercadopago';
 import dotenv from 'dotenv';
 import { Octokit } from "octokit";
+import { createServer } from "http";
+import { Server } from "socket.io";
 
 dotenv.config();
 
 const app = express();
 const PORT = 3000;
 
+const httpServer = createServer(app);
+const io = new Server(httpServer, {
+  cors: {
+    origin: "*",
+  }
+});
+
+io.on("connection", (socket) => {
+  console.log("User connected:", socket.id);
+  
+  socket.on("join", (userId) => {
+    socket.join(userId);
+    console.log(`User ${userId} joined room`);
+  });
+
+  socket.on("disconnect", () => {
+    console.log("User disconnected:", socket.id);
+  });
+});
+
+app.set("io", io);
+
 app.use(express.json({ limit: '10mb' }));
+
+// Helper function to get PayPal Access Token
+async function getPayPalAccessToken() {
+  const clientId = process.env.PAYPAL_CLIENT_ID;
+  const clientSecret = process.env.PAYPAL_CLIENT_SECRET;
+  
+  if (!clientId || !clientSecret) {
+    throw new Error('PayPal credentials missing');
+  }
+
+  const auth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
+  const response = await fetch('https://api-m.sandbox.paypal.com/v1/oauth2/token', {
+    method: 'POST',
+    body: 'grant_type=client_credentials',
+    headers: {
+      Authorization: `Basic ${auth}`,
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+  });
+
+  const data = await response.json();
+  return data.access_token;
+}
 
 // API Routes
 app.post("/api/publish", async (req, res) => {
@@ -142,6 +189,76 @@ app.post("/api/update-icon", (req, res) => {
   }
 });
 
+app.post("/api/paypal/create-order", async (req, res) => {
+  try {
+    const { price, coins, userId } = req.body;
+    const accessToken = await getPayPalAccessToken();
+
+    const response = await fetch('https://api-m.sandbox.paypal.com/v2/checkout/orders', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({
+        intent: 'CAPTURE',
+        purchase_units: [
+          {
+            reference_id: `coins-${coins}-${userId}`,
+            amount: {
+              currency_code: 'BRL',
+              value: price.toString(),
+            },
+            custom_id: JSON.stringify({ userId, coins })
+          },
+        ],
+      }),
+    });
+
+    const data = await response.json();
+    res.json(data);
+  } catch (error: any) {
+    console.error('PayPal create order error:', error);
+    res.status(500).json({ error: 'Erro ao criar pedido no PayPal' });
+  }
+});
+
+app.post("/api/paypal/capture-order", async (req, res) => {
+  try {
+    const { orderID } = req.body;
+    const accessToken = await getPayPalAccessToken();
+
+    const response = await fetch(`https://api-m.sandbox.paypal.com/v2/checkout/orders/${orderID}/capture`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    const data = await response.json();
+    
+    // Notify user via WebSocket
+    if (data.status === 'COMPLETED') {
+      const customId = data.purchase_units[0].payments.captures[0].custom_id;
+      if (customId) {
+        const { userId, coins } = JSON.parse(customId);
+        const io = req.app.get("io");
+        io.to(userId).emit("notification", {
+          title: "Pagamento Aprovado",
+          message: `Você comprou ${coins} moedas com sucesso!`,
+          type: "success"
+        });
+      }
+    }
+
+    res.json(data);
+  } catch (error: any) {
+    console.error('PayPal capture error:', error);
+    res.status(500).json({ error: 'Erro ao capturar pedido no PayPal' });
+  }
+});
+
 const startServer = async () => {
   // Only use Vite in development and when NOT on Vercel
   if (process.env.NODE_ENV !== "production" && !process.env.VERCEL) {
@@ -162,7 +279,7 @@ const startServer = async () => {
 
   // Only listen if not running as a Vercel function
   if (!process.env.VERCEL) {
-    app.listen(PORT, "0.0.0.0", () => {
+    httpServer.listen(PORT, "0.0.0.0", () => {
       console.log(`Server running on http://localhost:${PORT}`);
     });
   }

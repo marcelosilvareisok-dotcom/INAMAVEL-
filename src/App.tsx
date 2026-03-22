@@ -11,6 +11,8 @@ import ErrorBoundary from './components/ErrorBoundary';
 import SplashScreen from './components/SplashScreen';
 import WelcomeModal from './components/WelcomeModal';
 import { requestNotificationPermission } from './services/notifications';
+import { SocketProvider } from './contexts/SocketContext';
+import { PayPalScriptProvider } from "@paypal/react-paypal-js";
 
 // Pages
 import Home from './pages/Home';
@@ -25,6 +27,8 @@ import Docs from './pages/Docs';
 import Timeline from './pages/Timeline';
 import ProjectDetail from './pages/ProjectDetail';
 import EngineeringHub from './pages/EngineeringHub';
+
+import AdminDashboard from './pages/AdminDashboard';
 
 // Components
 import Layout from './components/Layout';
@@ -137,80 +141,98 @@ export default function App() {
     window.location.href = '/docs';
   };
 
+  const initialOptions = {
+    clientId: import.meta.env.VITE_PAYPAL_CLIENT_ID || "test",
+    currency: "BRL",
+    intent: "capture",
+  };
+
   return (
     <ErrorBoundary>
-      {showSplash && <SplashScreen onComplete={() => setShowSplash(false)} />}
-      <WelcomeModal 
-        isOpen={showWelcome} 
-        onClose={handleCloseWelcome} 
-        onExplore={handleExplore}
-      />
-      <Router>
-        <Routes>
-          {/* Public Routes without Layout */}
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          
-          {/* Editor has its own custom layout */}
-          <Route 
-            path="/editor/:id" 
-            element={
-              <AuthGuard>
-                <Editor />
-              </AuthGuard>
-            } 
+      <PayPalScriptProvider options={initialOptions}>
+        <SocketProvider>
+          {showSplash && <SplashScreen onComplete={() => setShowSplash(false)} />}
+          <WelcomeModal 
+            isOpen={showWelcome} 
+            onClose={handleCloseWelcome} 
+            onExplore={handleExplore}
           />
+          <Router>
+            <Routes>
+              {/* Public Routes without Layout */}
+              <Route path="/" element={<Home />} />
+              <Route path="/login" element={<Login />} />
+              
+              {/* Editor has its own custom layout */}
+              <Route 
+                path="/editor/:id" 
+                element={
+                  <AuthGuard>
+                    <Editor />
+                  </AuthGuard>
+                } 
+              />
 
-          {/* Routes with Main Layout */}
-          <Route
-            path="*"
-            element={
-              <Layout user={user} coins={profile?.coins || 0}>
-                <Routes>
-                  <Route
-                    path="/dashboard"
-                    element={
-                      <AuthGuard>
-                        <Dashboard />
-                      </AuthGuard>
-                    }
-                  />
-                  <Route
-                    path="/new"
-                    element={
-                      <AuthGuard>
-                        <NewProject />
-                      </AuthGuard>
-                    }
-                  />
-                  <Route
-                    path="/pricing"
-                    element={
-                      <AuthGuard>
-                        <Pricing />
-                      </AuthGuard>
-                    }
-                  />
-                  <Route path="/about" element={<About />} />
-                  <Route path="/docs" element={<Docs />} />
-                  <Route path="/hub" element={<EngineeringHub />} />
-                  <Route path="/timeline" element={<Timeline />} />
-                  <Route path="/project/:id" element={<ProjectDetail />} />
-                  <Route 
-                    path="/admin" 
-                    element={
-                      <AuthGuard>
-                        {user?.email === 'marcelodasilvareis30@gmail.com' ? <Admin /> : <Navigate to="/dashboard" replace />}
-                      </AuthGuard>
-                    } 
-                  />
-                  <Route path="*" element={<Navigate to="/dashboard" replace />} />
-                </Routes>
-              </Layout>
-            }
-          />
-        </Routes>
-      </Router>
+              {/* Routes with Main Layout */}
+              <Route
+                path="*"
+                element={
+                  <Layout user={user} coins={profile?.coins || 0}>
+                    <Routes>
+                      <Route
+                        path="/dashboard"
+                        element={
+                          <AuthGuard>
+                            <Dashboard />
+                          </AuthGuard>
+                        }
+                      />
+                      <Route
+                        path="/new"
+                        element={
+                          <AuthGuard>
+                            <NewProject />
+                          </AuthGuard>
+                        }
+                      />
+                      <Route
+                        path="/pricing"
+                        element={
+                          <AuthGuard>
+                            <Pricing />
+                          </AuthGuard>
+                        }
+                      />
+                      <Route path="/about" element={<About />} />
+                      <Route path="/docs" element={<Docs />} />
+                      <Route path="/hub" element={<EngineeringHub />} />
+                      <Route path="/timeline" element={<Timeline />} />
+                      <Route path="/project/:id" element={<ProjectDetail />} />
+                      <Route 
+                        path="/admin" 
+                        element={
+                          <AuthGuard>
+                            {user?.email === 'marcelodasilvareis30@gmail.com' ? <Admin /> : <Navigate to="/dashboard" replace />}
+                          </AuthGuard>
+                        } 
+                      />
+                      <Route 
+                        path="/admin/dashboard" 
+                        element={
+                          <AuthGuard>
+                            {user?.email === 'marcelodasilvareis30@gmail.com' ? <AdminDashboard /> : <Navigate to="/dashboard" replace />}
+                          </AuthGuard>
+                        } 
+                      />
+                      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+                    </Routes>
+                  </Layout>
+                }
+              />
+            </Routes>
+          </Router>
+        </SocketProvider>
+      </PayPalScriptProvider>
     </ErrorBoundary>
   );
 }

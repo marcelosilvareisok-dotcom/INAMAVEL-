@@ -2,7 +2,8 @@ import React from 'react';
 import { collection, getDocs, doc, updateDoc, query, orderBy, setDoc, getDoc, onSnapshot, getDocFromServer } from 'firebase/firestore';
 import { db } from '../firebase';
 import { motion } from 'motion/react';
-import { Users, Coins, Search, ShieldCheck, ArrowUpRight, ArrowDownRight, RefreshCw, Zap, ZapOff } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Users, Coins, Search, ShieldCheck, ArrowUpRight, ArrowDownRight, RefreshCw, Zap, ZapOff, BarChart2 } from 'lucide-react';
 
 interface UserData {
   uid: string;
@@ -159,13 +160,22 @@ export default function Admin() {
           </h1>
           <p className="text-white/60">Gerencie os usuários e recursos da plataforma.</p>
         </div>
-        <button 
-          onClick={fetchUsers}
-          className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-colors"
-        >
-          <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
-          Atualizar
-        </button>
+        <div className="flex items-center gap-4">
+          <Link 
+            to="/admin/dashboard"
+            className="flex items-center gap-2 px-4 py-2 bg-purple-500 text-white rounded-xl hover:bg-purple-600 transition-colors font-bold"
+          >
+            <BarChart2 size={18} />
+            Painel Analítico
+          </Link>
+          <button 
+            onClick={fetchUsers}
+            className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-colors"
+          >
+            <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
+            Atualizar
+          </button>
+        </div>
       </div>
 
       {/* Stats */}

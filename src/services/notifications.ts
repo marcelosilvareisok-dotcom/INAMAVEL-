@@ -2,7 +2,7 @@ import { getToken, onMessage } from 'firebase/messaging';
 import { messaging, db } from '../firebase';
 import { doc, updateDoc } from 'firebase/firestore';
 
-const VAPID_KEY = 'TODO_YOUR_VAPID_KEY'; // User will need to provide this from Firebase Console
+const VAPID_KEY = '2cuSd9TiFsq0hjQ4aW6Lk55HK9x_FpyaqEeQODaF1Vg'; // User will need to provide this from Firebase Console
 
 export async function requestNotificationPermission(userId: string) {
   if (!messaging) return;

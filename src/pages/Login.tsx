@@ -1,11 +1,11 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { auth, googleProvider, db } from '../firebase';
+import { auth, googleProvider, githubProvider, db } from '../firebase';
 import { signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { handleFirestoreError, OperationType } from '../utils/firestore-errors';
 import { motion } from 'motion/react';
-import { Heart, Mail, Lock, Chrome, ArrowRight, Sparkles, Eye, EyeOff } from 'lucide-react';
+import { Heart, Mail, Lock, Chrome, Github, ArrowRight, Sparkles, Eye, EyeOff } from 'lucide-react';
 
 export default function Login() {
   const [isLogin, setIsLogin] = React.useState(true);
@@ -76,6 +76,19 @@ export default function Login() {
     setError('');
     try {
       const result = await signInWithPopup(auth, googleProvider);
+      await handleAuthSuccess(result.user);
+    } catch (err: any) {
+      setError(translateError(err.message));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGithubLogin = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const result = await signInWithPopup(auth, githubProvider);
       await handleAuthSuccess(result.user);
     } catch (err: any) {
       setError(translateError(err.message));
@@ -220,14 +233,24 @@ export default function Login() {
             </div>
           </div>
 
-          <button
-            onClick={handleGoogleLogin}
-            disabled={loading}
-            className="w-full py-4 bg-white/5 border border-white/10 text-white font-bold rounded-xl hover:bg-white/10 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
-          >
-            <Chrome size={20} />
-            Google
-          </button>
+          <div className="grid grid-cols-2 gap-4">
+            <button
+              onClick={handleGoogleLogin}
+              disabled={loading}
+              className="w-full py-4 bg-white/5 border border-white/10 text-white font-bold rounded-xl hover:bg-white/10 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+            >
+              <Chrome size={20} />
+              Google
+            </button>
+            <button
+              onClick={handleGithubLogin}
+              disabled={loading}
+              className="w-full py-4 bg-white/5 border border-white/10 text-white font-bold rounded-xl hover:bg-white/10 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+            >
+              <Github size={20} />
+              GitHub
+            </button>
+          </div>
 
           <p className="mt-8 text-center text-sm text-white/40">
             {isLogin ? 'Ainda não tem conta?' : 'Já tem uma conta?'}

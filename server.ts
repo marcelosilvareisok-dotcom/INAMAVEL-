@@ -260,8 +260,12 @@ app.post("/api/paypal/capture-order", async (req, res) => {
 });
 
 const startServer = async () => {
-  // Only use Vite in development and when NOT on Vercel
-  if (process.env.NODE_ENV !== "production" && !process.env.VERCEL) {
+  // Force Vite in development mode for debugging
+  const isDev = true; // process.env.NODE_ENV !== "production" && !process.env.VERCEL;
+  console.log(`Server environment: NODE_ENV=${process.env.NODE_ENV}, VERCEL=${process.env.VERCEL}, isDev=${isDev}`);
+
+  if (isDev) {
+    console.log("Starting server in DEVELOPMENT mode with Vite middleware");
     const { createServer: createViteServer } = await import("vite");
     const vite = await createViteServer({
       server: { middlewareMode: true },
@@ -269,7 +273,7 @@ const startServer = async () => {
     });
     app.use(vite.middlewares);
   } else if (!process.env.VERCEL) {
-    // Static serving only for non-Vercel production (like local production build)
+    console.log("Starting server in PRODUCTION mode (static serving)");
     const distPath = path.join(process.cwd(), 'dist');
     app.use(express.static(distPath));
     app.get('*', (req, res) => {

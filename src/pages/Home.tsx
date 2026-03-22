@@ -119,23 +119,6 @@ export default function Home() {
         </motion.div>
       </section>
 
-      {/* Stats Section - Recipe 5: Brutalist */}
-      <section className="border-y border-white/5 bg-white/[0.02]">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3">
-          {[
-            { label: "Projetos Criados", value: "12.5k+", icon: Layout },
-            { label: "Tempo de Geração", value: "3.2s", icon: Zap },
-            { label: "Taxa de Sucesso", value: "99.9%", icon: ShieldCheck },
-          ].map((stat, i) => (
-            <div key={i} className="p-12 border-b md:border-b-0 md:border-r border-white/5 last:border-b-0 md:last:border-r-0 flex flex-col items-center text-center group hover:bg-white/5 transition-colors">
-              <stat.icon size={32} className="text-purple-500 mb-6 group-hover:scale-110 transition-transform" />
-              <p className="text-6xl font-black tracking-tighter mb-2">{stat.value}</p>
-              <p className="text-xs font-black uppercase tracking-[0.3em] text-white/40">{stat.label}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
       {/* Features Grid */}
       <section className="py-32 px-4 relative">
         <div className="max-w-7xl mx-auto">

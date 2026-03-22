@@ -10,7 +10,7 @@ dotenv.config();
 const app = express();
 const PORT = 3000;
 
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 
 // API Routes
 app.post("/api/publish", async (req, res) => {

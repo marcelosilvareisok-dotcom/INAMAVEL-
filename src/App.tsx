@@ -75,7 +75,6 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  console.log("App component is rendering");
   const [user, setUser] = React.useState<any>(null);
   const [profile, setProfile] = React.useState<UserProfile | null>(null);
   const [loading, setLoading] = React.useState(true);

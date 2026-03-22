@@ -200,10 +200,19 @@ export default function Layout({ children, user, coins }: LayoutProps) {
         {/* Main Content */}
         <main className="flex-1 lg:ml-64 min-h-[calc(100vh-56px)] p-4 lg:p-8">
           <div className="max-w-5xl mx-auto">
-            <div className="mb-6 p-4 bg-white/5 border border-white/10 rounded-xl text-center text-sm text-white/80 font-mono">
-              Aviso serviço em desenvolvimento de ajuste FINO.(INICIO)
-              ESTAMOS CONTRATANDO FUNDADORES.
-              SEJA CURSIOSO...❤️💔🙀
+            <div className="mb-6 p-6 bg-gradient-to-r from-purple-900/40 to-blue-900/40 border border-purple-500/30 rounded-2xl text-center text-white shadow-lg shadow-purple-500/10">
+              <div className="flex items-center justify-center gap-3 mb-2">
+                <Terminal className="text-purple-400" size={24} />
+                <h3 className="text-lg font-bold uppercase tracking-wider">Serviço em Ajuste Fino</h3>
+              </div>
+              <p className="text-sm text-white/70 mb-4 max-w-2xl mx-auto">
+                Estamos refinando nossa infraestrutura para oferecer a melhor experiência possível. 
+                Agradecemos sua paciência enquanto construímos o futuro.
+              </p>
+              <div className="inline-block px-4 py-1.5 bg-purple-500/20 rounded-full text-xs font-bold text-purple-300 border border-purple-500/30 uppercase tracking-widest">
+                Estamos Contratando Fundadores
+              </div>
+              <p className="mt-4 text-xs text-white/40 font-mono">Seja curioso... ❤️💔🙀</p>
             </div>
             <AnimatePresence mode="wait">
               <motion.div

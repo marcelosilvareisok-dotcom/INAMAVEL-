@@ -60,7 +60,11 @@ export async function generateProjectContent(name: string, type: string, objecti
       }
     });
 
-    return JSON.parse(response.text || "{}");
+    const text = response.text || "{}";
+    // Try to extract JSON if it's wrapped in markdown or has extra text
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    const jsonString = jsonMatch ? jsonMatch[0] : text;
+    return JSON.parse(jsonString);
   } catch (error: any) {
     console.error("Erro ao gerar conteúdo com Gemini:", error);
     if (error?.message?.includes('429') || error?.status === 'RESOURCE_EXHAUSTED' || error?.message?.includes('Quota exceeded')) {

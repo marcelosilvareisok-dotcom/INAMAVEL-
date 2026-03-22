@@ -144,7 +144,14 @@ export default function Editor() {
     e.preventDefault();
     if (!promptInput.trim() || !project || isGenerating) return;
 
-    const currentContent = JSON.parse(project.content || '{}');
+    let currentContent;
+    try {
+      currentContent = JSON.parse(project.content || '{}');
+    } catch (e) {
+      console.error("Erro ao parsear conteúdo do projeto:", e);
+      alert("Erro ao ler o conteúdo do projeto. O formato está inválido.");
+      return;
+    }
     if (!currentContent.html) return;
 
     setIsGenerating(true);
@@ -197,7 +204,13 @@ export default function Editor() {
     );
   }
 
-  const content = JSON.parse(project.content || '{}');
+  let content;
+  try {
+    content = JSON.parse(project.content || '{}');
+  } catch (e) {
+    console.error("Erro ao parsear conteúdo do projeto:", e);
+    content = { html: "" };
+  }
 
   return (
     <div className="h-screen flex flex-col bg-[#050505] overflow-hidden">

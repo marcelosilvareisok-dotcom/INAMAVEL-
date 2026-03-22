@@ -28,6 +28,7 @@ import PublishModal from '../components/PublishModal';
 
 export default function Dashboard() {
   const [projects, setProjects] = React.useState<Project[]>([]);
+  const [transactions, setTransactions] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [searchTerm, setSearchTerm] = React.useState('');
   const [prompt, setPrompt] = React.useState('');
@@ -39,10 +40,48 @@ export default function Dashboard() {
   const navigate = useNavigate();
 
   React.useEffect(() => {
-    const hasSeenTutorial = localStorage.getItem('has_seen_dashboard_tutorial');
-    if (!hasSeenTutorial) {
-      setRunTutorial(true);
-    }
+    if (!auth.currentUser) return;
+
+    const q = query(
+      collection(db, 'projects'),
+      where('userId', '==', auth.currentUser.uid),
+      orderBy('updatedAt', 'desc')
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const projectsData = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as Project[];
+      setProjects(projectsData);
+      setLoading(false);
+    }, (error) => {
+      handleFirestoreError(error, OperationType.LIST, 'projects');
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  React.useEffect(() => {
+    if (!auth.currentUser) return;
+
+    const q = query(
+      collection(db, 'transactions'),
+      where('userId', '==', auth.currentUser.uid),
+      orderBy('createdAt', 'desc')
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const transactionsData = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setTransactions(transactionsData);
+    }, (error) => {
+      handleFirestoreError(error, OperationType.LIST, 'transactions');
+    });
+
+    return () => unsubscribe();
   }, []);
 
   const tutorialSteps = [
@@ -409,6 +448,33 @@ export default function Dashboard() {
             </p>
           </div>
         )}
+      </div>
+
+      {/* Transactions Section */}
+      <div className="space-y-6">
+        <h2 className="text-lg font-medium text-white border-b border-white/10 pb-4">Histórico de Transações</h2>
+        <div className="bg-[#0A0A0A] border border-white/10 rounded-xl overflow-hidden">
+          <table className="w-full text-left text-sm">
+            <thead>
+              <tr className="border-b border-white/10">
+                <th className="px-6 py-4 text-white/40">Descrição</th>
+                <th className="px-6 py-4 text-white/40">Data</th>
+                <th className="px-6 py-4 text-white/40 text-right">Valor</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/5">
+              {transactions.map((t) => (
+                <tr key={t.id}>
+                  <td className="px-6 py-4 text-white">{t.description}</td>
+                  <td className="px-6 py-4 text-white/40">{new Date(t.createdAt).toLocaleDateString()}</td>
+                  <td className={cn("px-6 py-4 text-right font-mono", t.type === 'purchase' ? 'text-green-500' : 'text-red-500')}>
+                    {t.type === 'purchase' ? '+' : '-'}{t.amount}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {shareProject && (

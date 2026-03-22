@@ -37,7 +37,7 @@ service cloud.firestore {
              data.role in ['user', 'admin'];
     }
     function isValidProject(data) {
-      return hasOnlyAllowedFields(['id', 'userId', 'name', 'type', 'content', 'status', 'slug', 'githubUrl', 'updatedAt']) &&
+      return hasOnlyAllowedFields(['id', 'userId', 'name', 'type', 'content', 'status', 'slug', 'githubUrl', 'updatedAt', 'isPublic', 'isForSale', 'price']) &&
              data.id is string && data.id.size() > 0 && data.id.size() < 100 &&
              data.userId is string && data.userId.size() > 0 && data.userId.size() < 100 &&
              data.name is string && data.name.size() > 0 && data.name.size() < 100 &&
@@ -46,7 +46,10 @@ service cloud.firestore {
              data.status in ['draft', 'published'] &&
              data.slug is string && data.slug.size() > 0 && data.slug.size() < 100 &&
              (!('githubUrl' in data) || (data.githubUrl is string && data.githubUrl.size() > 0 && data.githubUrl.size() < 500)) &&
-             (!('updatedAt' in data) || (data.updatedAt is string && data.updatedAt.size() > 0 && data.updatedAt.size() < 100));
+             (!('updatedAt' in data) || (data.updatedAt is string && data.updatedAt.size() > 0 && data.updatedAt.size() < 100)) &&
+             (!('isPublic' in data) || data.isPublic is bool) &&
+             (!('isForSale' in data) || data.isForSale is bool) &&
+             (!('price' in data) || (data.price is number && data.price >= 0));
     }
     function isValidTransaction(data) {
       return hasOnlyAllowedFields(['id', 'userId', 'amount', 'type', 'description']) &&
@@ -55,6 +58,15 @@ service cloud.firestore {
              data.amount is number && data.amount >= 0 &&
              data.type in ['purchase', 'spend'] &&
              data.description is string && data.description.size() > 0 && data.description.size() < 500;
+    }
+    function isValidComment(data) {
+      return hasOnlyAllowedFields(['id', 'projectId', 'userId', 'authorName', 'text', 'createdAt']) &&
+             data.id is string && data.id.size() > 0 && data.id.size() < 100 &&
+             data.projectId is string && data.projectId.size() > 0 && data.projectId.size() < 100 &&
+             data.userId is string && data.userId.size() > 0 && data.userId.size() < 100 &&
+             data.authorName is string && data.authorName.size() > 0 && data.authorName.size() < 100 &&
+             data.text is string && data.text.size() > 0 && data.text.size() < 1000 &&
+             data.createdAt is string && data.createdAt.size() > 0 && data.createdAt.size() < 100;
     }
 
     // ===============================================================
@@ -72,10 +84,16 @@ service cloud.firestore {
     }
 
     match /projects/{projectId} {
-      allow read: if (isAuthenticated() && resource.data.userId == request.auth.uid) || resource.data.status == 'published' || isAdmin();
+      allow read: if (isAuthenticated() && resource.data.userId == request.auth.uid) || resource.data.status == 'published' || (resource.data.isPublic == true) || isAdmin();
       allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid && isValidProject(request.resource.data);
       allow update: if isAuthenticated() && resource.data.userId == request.auth.uid && isValidProject(request.resource.data) && request.resource.data.userId == resource.data.userId;
       allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid || isAdmin();
+      
+      match /comments/{commentId} {
+        allow read: if true;
+        allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid && isValidComment(request.resource.data);
+        allow update, delete: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
+      }
     }
 
     match /transactions/{transactionId} {

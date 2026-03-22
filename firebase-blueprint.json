@@ -30,7 +30,10 @@
         "createdAt": { "type": "string", "format": "date-time" },
         "updatedAt": { "type": "string", "format": "date-time" },
         "slug": { "type": "string" },
-        "githubUrl": { "type": "string" }
+        "githubUrl": { "type": "string" },
+        "isPublic": { "type": "boolean" },
+        "isForSale": { "type": "boolean" },
+        "price": { "type": "number" }
       },
       "required": ["id", "userId", "name", "type", "content", "status", "createdAt", "updatedAt", "slug"]
     },
@@ -47,6 +50,20 @@
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["id", "userId", "amount", "type", "description", "createdAt"]
+    },
+    "Comment": {
+      "title": "Comment",
+      "description": "A comment on a project",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "projectId": { "type": "string" },
+        "userId": { "type": "string" },
+        "authorName": { "type": "string" },
+        "text": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "projectId", "userId", "authorName", "text", "createdAt"]
     }
   },
   "firestore": {
@@ -61,6 +78,10 @@
     "/transactions/{transactionId}": {
       "schema": "Transaction",
       "description": "Coin transactions"
+    },
+    "/projects/{projectId}/comments/{commentId}": {
+      "schema": "Comment",
+      "description": "Comments on a project"
     }
   }
 }

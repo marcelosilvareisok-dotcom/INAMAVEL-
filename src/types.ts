@@ -20,6 +20,9 @@ export interface Project {
   updatedAt: string;
   slug: string;
   githubUrl?: string;
+  isPublic?: boolean;
+  isForSale?: boolean;
+  price?: number;
 }
 
 export interface Transaction {

@@ -20,7 +20,8 @@ import Pricing from './pages/Pricing';
 import About from './pages/About';
 import Admin from './pages/Admin';
 import Docs from './pages/Docs';
-import EngineeringHub from './pages/EngineeringHub';
+import Timeline from './pages/Timeline';
+import ProjectDetail from './pages/ProjectDetail';
 
 // Components
 import Layout from './components/Layout';
@@ -151,6 +152,8 @@ export default function App() {
                   <Route path="/about" element={<About />} />
                   <Route path="/docs" element={<Docs />} />
                   <Route path="/hub" element={<EngineeringHub />} />
+                  <Route path="/timeline" element={<Timeline />} />
+                  <Route path="/project/:id" element={<ProjectDetail />} />
                   <Route 
                     path="/admin" 
                     element={

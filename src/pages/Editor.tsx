@@ -146,7 +146,8 @@ export default function Editor() {
       setPromptInput('');
     } catch (error) {
       console.error("Erro ao modificar:", error);
-      alert("Erro ao modificar o projeto. Tente novamente.");
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      alert(`Erro ao modificar o projeto: ${errorMessage}`);
     } finally {
       setIsGenerating(false);
     }

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { db, auth } from '../firebase';
-import { collection, query, where, onSnapshot, orderBy, doc, updateDoc, increment, setDoc } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, orderBy, doc, updateDoc, increment, setDoc, deleteDoc } from 'firebase/firestore';
 import { Project } from '../types';
 import { handleFirestoreError, OperationType } from '../utils/firestore-errors';
 import { motion, AnimatePresence } from 'motion/react';
@@ -33,7 +33,18 @@ export default function Dashboard() {
   const [showPaymentSuccess, setShowPaymentSuccess] = React.useState<{ coins: number } | null>(null);
   const [shareProject, setShareProject] = React.useState<{ url: string; name: string } | null>(null);
   const [publishProject, setPublishProject] = React.useState<Project | null>(null);
+  const [deleteProject, setDeleteProject] = React.useState<Project | null>(null);
   const navigate = useNavigate();
+
+  const handleDelete = async () => {
+    if (!deleteProject) return;
+    try {
+      await deleteDoc(doc(db, 'projects', deleteProject.id));
+      setDeleteProject(null);
+    } catch (error) {
+      handleFirestoreError(error, OperationType.DELETE, 'projects');
+    }
+  };
 
   const handlePublish = async (config: { githubToken: string; repoOwner: string; repoName: string }) => {
     if (!publishProject) return;
@@ -341,7 +352,7 @@ export default function Dashboard() {
                         <button 
                           onClick={(e) => {
                             e.stopPropagation();
-                            // Handle delete logic here or open a modal
+                            setDeleteProject(project);
                           }}
                           className="text-white/20 hover:text-red-400 transition-colors"
                           title="Excluir"
@@ -382,6 +393,43 @@ export default function Dashboard() {
           onPublish={handlePublish}
           projectName={publishProject.name}
         />
+      )}
+
+      {deleteProject && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setDeleteProject(null)}
+            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+          />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 10 }}
+            className="relative w-full max-w-sm bg-[#09090B] border border-white/10 rounded-2xl p-8 text-center shadow-2xl"
+          >
+            <h2 className="text-xl font-semibold mb-2">Excluir Projeto</h2>
+            <p className="text-sm text-white/60 mb-8">
+              Tem certeza que deseja excluir o projeto "{deleteProject.name}"? Esta ação não pode ser desfeita.
+            </p>
+            <div className="flex gap-3">
+              <button 
+                onClick={() => setDeleteProject(null)}
+                className="flex-1 py-2.5 bg-white/5 text-white text-sm font-medium rounded-lg hover:bg-white/10 transition-all"
+              >
+                Cancelar
+              </button>
+              <button 
+                onClick={handleDelete}
+                className="flex-1 py-2.5 bg-red-500 text-white text-sm font-medium rounded-lg hover:bg-red-600 transition-all"
+              >
+                Excluir
+              </button>
+            </div>
+          </motion.div>
+        </div>
       )}
     </div>
   );

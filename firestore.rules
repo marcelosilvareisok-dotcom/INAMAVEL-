@@ -43,7 +43,8 @@ service cloud.firestore {
              data.content is string && data.content.size() < 1000000 &&
              data.status in ['draft', 'published'] &&
              data.slug is string &&
-             (!('githubUrl' in data) || (data.githubUrl is string && data.githubUrl.size() < 500));
+             (!('githubUrl' in data) || (data.githubUrl is string && data.githubUrl.size() < 500)) &&
+             (!('updatedAt' in data) || data.updatedAt is string);
     }
     function isValidTransaction(data) {
       return data.id is string &&

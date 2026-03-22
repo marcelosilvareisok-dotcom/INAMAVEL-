@@ -19,39 +19,42 @@ service cloud.firestore {
           get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin') ||
           (request.auth.token.email == "marcelodasilvareis30@gmail.com" && request.auth.token.email_verified == true));
     }
-    function hasRequiredFields(fields) {
-      return request.resource.data.keys().hasAll(fields);
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
     }
     function isValidEmail(email) {
-      return email is string && email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+      return email is string && email.size() > 0 && email.size() < 255 && email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
     }
 
     // ===============================================================
     // Domain Validators
     // ===============================================================
     function isValidUser(data) {
-      return data.uid is string &&
-             data.email is string && data.email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$") &&
+      return hasOnlyAllowedFields(['uid', 'email', 'coins', 'role']) &&
+             data.uid is string && data.uid.size() > 0 && data.uid.size() < 100 &&
+             isValidEmail(data.email) &&
              data.coins is number && data.coins >= 0 &&
              data.role in ['user', 'admin'];
     }
     function isValidProject(data) {
-      return data.id is string &&
-             data.userId is string &&
+      return hasOnlyAllowedFields(['id', 'userId', 'name', 'type', 'content', 'status', 'slug', 'githubUrl', 'updatedAt']) &&
+             data.id is string && data.id.size() > 0 && data.id.size() < 100 &&
+             data.userId is string && data.userId.size() > 0 && data.userId.size() < 100 &&
              data.name is string && data.name.size() > 0 && data.name.size() < 100 &&
              data.type in ['website', 'app', 'landing', 'service'] &&
-             data.content is string && data.content.size() < 1000000 &&
+             data.content is string && data.content.size() > 0 && data.content.size() < 1000000 &&
              data.status in ['draft', 'published'] &&
-             data.slug is string &&
-             (!('githubUrl' in data) || (data.githubUrl is string && data.githubUrl.size() < 500)) &&
-             (!('updatedAt' in data) || data.updatedAt is string);
+             data.slug is string && data.slug.size() > 0 && data.slug.size() < 100 &&
+             (!('githubUrl' in data) || (data.githubUrl is string && data.githubUrl.size() > 0 && data.githubUrl.size() < 500)) &&
+             (!('updatedAt' in data) || (data.updatedAt is string && data.updatedAt.size() > 0 && data.updatedAt.size() < 100));
     }
     function isValidTransaction(data) {
-      return data.id is string &&
-             data.userId is string &&
-             data.amount is number &&
+      return hasOnlyAllowedFields(['id', 'userId', 'amount', 'type', 'description']) &&
+             data.id is string && data.id.size() > 0 && data.id.size() < 100 &&
+             data.userId is string && data.userId.size() > 0 && data.userId.size() < 100 &&
+             data.amount is number && data.amount >= 0 &&
              data.type in ['purchase', 'spend'] &&
-             data.description is string;
+             data.description is string && data.description.size() > 0 && data.description.size() < 500;
     }
 
     // ===============================================================

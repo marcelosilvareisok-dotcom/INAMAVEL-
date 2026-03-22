@@ -1,14 +1,20 @@
 import { GoogleGenAI, Type } from "@google/genai";
 
-const apiKey = process.env.GEMINI_API_KEY;
+let aiClient: GoogleGenAI | null = null;
 
-if (!apiKey) {
-  console.error("ERRO: GEMINI_API_KEY não encontrada no ambiente.");
+function getAiClient(): GoogleGenAI {
+  if (!aiClient) {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      console.error("ERRO: GEMINI_API_KEY não encontrada no ambiente.");
+    }
+    aiClient = new GoogleGenAI({ apiKey: apiKey || "" });
+  }
+  return aiClient;
 }
 
-const ai = new GoogleGenAI({ apiKey: apiKey || "" });
-
 export async function generateProjectContent(name: string, type: string, objective: string, currentHtml?: string, modificationPrompt?: string) {
+  const ai = getAiClient();
   let prompt = `
     Você é um desenvolvedor frontend expert (nível engenheiro sênior).
     Seu objetivo é criar uma interface de usuário completa, moderna e responsiva baseada nos requisitos abaixo.

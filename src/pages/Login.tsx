@@ -18,6 +18,7 @@ export default function Login() {
   const navigate = useNavigate();
 
   const translateError = (message: string) => {
+    console.error('Auth Error:', message); // Log the actual error
     if (message.includes('auth/invalid-credential')) return 'Email ou senha incorretos.';
     if (message.includes('auth/user-not-found')) return 'Usuário não encontrado.';
     if (message.includes('auth/wrong-password')) return 'Senha incorreta.';

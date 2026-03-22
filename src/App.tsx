@@ -120,9 +120,14 @@ export default function App() {
     console.log('Fechando WelcomeModal');
     setShowWelcome(false);
     if (user) {
-      await updateDoc(doc(db, 'users', user.uid), {
-        hasSeenWelcome: true
-      });
+      try {
+        await updateDoc(doc(db, 'users', user.uid), {
+          hasSeenWelcome: true
+        });
+      } catch (error) {
+        console.error('Erro ao atualizar hasSeenWelcome:', error);
+        handleFirestoreError(error, OperationType.UPDATE, `users/${user.uid}`);
+      }
     }
   };
 

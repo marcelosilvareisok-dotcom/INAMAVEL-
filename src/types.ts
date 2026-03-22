@@ -9,6 +9,8 @@ export interface UserProfile {
   fcmToken?: string;
   notificationsEnabled?: boolean;
   hasSeenWelcome?: boolean;
+  phone?: string;
+  objective?: string;
 }
 
 export interface Project {

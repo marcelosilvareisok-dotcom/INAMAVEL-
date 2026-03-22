@@ -55,28 +55,24 @@ export default function Login() {
 
   const handleAuthSuccess = async (user: any, isGoogle: boolean = false) => {
     try {
-      const userRef = doc(db, 'users', user.uid);
-      const userDoc = await getDoc(userRef);
-
-      if (!userDoc.exists()) {
-        if (isGoogle && isLogin) {
-          setPendingUser(user);
-          setShowRegistration(true);
-          return;
-        }
-        await setDoc(userRef, {
+      // Call backend to initialize user
+      const response = await fetch('/api/auth/init-user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
           uid: user.uid,
           email: user.email,
           displayName: user.displayName || email.split('@')[0],
-          photoURL: user.photoURL || '',
-          coins: 100,
-          createdAt: serverTimestamp(),
-          role: 'user'
-        });
-      }
+          photoURL: user.photoURL || ''
+        })
+      });
+
+      if (!response.ok) throw new Error('Falha ao inicializar usuário');
+
       navigate('/dashboard');
     } catch (error) {
-      handleFirestoreError(error, OperationType.WRITE, 'users');
+      console.error('Error initializing user:', error);
+      setError('Erro ao inicializar usuário.');
     }
   };
 

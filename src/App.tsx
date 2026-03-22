@@ -19,6 +19,7 @@ import Editor from './pages/Editor';
 import Pricing from './pages/Pricing';
 import About from './pages/About';
 import Admin from './pages/Admin';
+import Docs from './pages/Docs';
 
 // Components
 import Layout from './components/Layout';
@@ -147,6 +148,7 @@ export default function App() {
                     }
                   />
                   <Route path="/about" element={<About />} />
+                  <Route path="/docs" element={<Docs />} />
                   <Route 
                     path="/admin" 
                     element={

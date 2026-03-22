@@ -9,7 +9,8 @@ import {
   Menu,
   X,
   ShieldCheck,
-  MessageCircle
+  MessageCircle,
+  BookOpen
 } from 'lucide-react';
 import { auth } from '../firebase';
 import { signOut } from 'firebase/auth';
@@ -33,6 +34,7 @@ export default function Layout({ children, user, coins }: LayoutProps) {
     { name: 'Novo Projeto', path: '/new', icon: PlusCircle },
     { name: 'Comprar Moedas', path: '/pricing', icon: Coins },
     { name: 'Sobre o CEO', path: '/about', icon: User },
+    { name: 'Docs', path: '/docs', icon: BookOpen },
   ];
 
   if (user?.email === 'marcelodasilvareis30@gmail.com') {

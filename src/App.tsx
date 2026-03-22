@@ -24,6 +24,7 @@ import Admin from './pages/Admin';
 import Docs from './pages/Docs';
 import Timeline from './pages/Timeline';
 import ProjectDetail from './pages/ProjectDetail';
+import EngineeringHub from './pages/EngineeringHub';
 
 // Components
 import Layout from './components/Layout';

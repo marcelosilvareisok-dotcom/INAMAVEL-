@@ -29,7 +29,27 @@ export default function Tutorial({ steps, run, onClose }: TutorialProps) {
           textColor: '#ffffff',
           backgroundColor: '#111111',
           arrowColor: '#111111',
-          overlayColor: 'rgba(0, 0, 0, 0.5)',
+          overlayColor: 'rgba(0, 0, 0, 0.8)',
+          zIndex: 10000,
+        },
+        tooltipContainer: {
+          borderRadius: '24px',
+          padding: '12px',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+        },
+        buttonNext: {
+          backgroundColor: '#8b5cf6',
+          borderRadius: '12px',
+          fontSize: '14px',
+          fontWeight: 'bold',
+          padding: '10px 20px',
+        },
+        buttonBack: {
+          color: 'rgba(255, 255, 255, 0.6)',
+          marginRight: '10px',
+        },
+        buttonSkip: {
+          color: 'rgba(255, 255, 255, 0.4)',
         },
       }}
       locale={{

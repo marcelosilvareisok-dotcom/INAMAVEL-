@@ -7,6 +7,7 @@ import { generateProjectContent } from '../services/gemini';
 import { Project } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
 import MonacoEditor from '@monaco-editor/react';
+import { Step } from 'react-joyride';
 import Logo from '../components/Logo';
 import PublishModal from '../components/PublishModal';
 import Tutorial from '../components/Tutorial';
@@ -52,18 +53,39 @@ export default function Editor() {
     }
   }, []);
 
-  const tutorialSteps = [
+  const tutorialSteps: Step[] = [
+    {
+      target: 'body',
+      content: 'Bem-vindo ao Editor do INABALÁVEL💔! Vamos te guiar pelas ferramentas principais.',
+      placement: 'center',
+    },
     {
       target: '.editor-preview',
-      content: 'Aqui você vê o preview do seu projeto em tempo real.',
+      content: 'Aqui você vê o preview do seu projeto em tempo real. Qualquer mudança no código ou via IA aparecerá aqui.',
+    },
+    {
+      target: '.view-mode-toggle',
+      content: 'Alterne entre a visualização de Desktop e Mobile para garantir que seu projeto seja responsivo.',
+    },
+    {
+      target: '.sidebar-tabs',
+      content: 'Use estas abas para alternar entre o Preview e o Editor de Código.',
     },
     {
       target: '.editor-code',
-      content: 'Aqui você pode editar o código fonte do seu projeto.',
+      content: 'Aqui você tem controle total sobre o código HTML/Tailwind. Você pode editar manualmente se desejar.',
     },
     {
       target: '.editor-prompt',
-      content: 'Peça para a IA fazer alterações no seu projeto aqui.',
+      content: 'Esta é a sua ferramenta mais poderosa! Peça para a IA fazer qualquer alteração, desde mudar cores até criar seções inteiras.',
+    },
+    {
+      target: '.save-button',
+      content: 'Não se esqueça de salvar suas alterações. O editor também possui salvamento automático.',
+    },
+    {
+      target: '.publish-button',
+      content: 'Quando estiver pronto, publique seu projeto diretamente no GitHub para colocá-lo no ar!',
     },
   ];
 
@@ -264,7 +286,7 @@ export default function Editor() {
           </div>
         </div>
 
-        <div className="hidden sm:flex items-center gap-2 bg-white/5 p-1 rounded-xl border border-white/10">
+        <div className="view-mode-toggle hidden sm:flex items-center gap-2 bg-white/5 p-1 rounded-xl border border-white/10">
           <button 
             onClick={() => setViewMode('desktop')}
             className={`p-2 rounded-lg transition-all ${viewMode === 'desktop' ? 'bg-white text-black' : 'text-white/40 hover:text-white'}`}
@@ -289,14 +311,14 @@ export default function Editor() {
           <button 
             onClick={handleSave}
             disabled={saving === 'saving'}
-            className="flex items-center gap-2 px-3 md:px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-xs md:text-sm font-bold hover:bg-white/10 transition-all disabled:opacity-50"
+            className="save-button flex items-center gap-2 px-3 md:px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-xs md:text-sm font-bold hover:bg-white/10 transition-all disabled:opacity-50"
           >
             <Save size={16} />
             <span className="hidden md:inline">{saving === 'saving' ? 'Salvando...' : 'Salvar'}</span>
           </button>
           <button 
             onClick={handlePublish}
-            className="flex items-center gap-2 px-3 md:px-4 py-2 bg-gradient-to-r from-purple-500 to-red-500 text-white rounded-xl text-xs md:text-sm font-bold hover:scale-105 transition-all shadow-lg shadow-purple-500/20"
+            className="publish-button flex items-center gap-2 px-3 md:px-4 py-2 bg-gradient-to-r from-purple-500 to-red-500 text-white rounded-xl text-xs md:text-sm font-bold hover:scale-105 transition-all shadow-lg shadow-purple-500/20"
           >
             <Globe size={16} />
             <span className="hidden md:inline">Publicar</span>
@@ -316,7 +338,7 @@ export default function Editor() {
               <X size={20} />
             </button>
           </div>
-          <div className="flex p-2 gap-1 border-b border-white/5">
+          <div className="sidebar-tabs flex p-2 gap-1 border-b border-white/5">
             {[
               { id: 'content', icon: Eye, label: 'Preview' },
               { id: 'design', icon: Type, label: 'Código' },

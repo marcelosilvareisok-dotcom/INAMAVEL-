@@ -303,7 +303,12 @@ export default function Admin() {
             <tbody className="divide-y divide-white/5">
               {loading ? (
                 <tr>
-                  <td colSpan={4} className="px-8 py-12 text-center text-white/40">Carregando usuários...</td>
+                  <td colSpan={4} className="px-8 py-12 text-center">
+                    <div className="flex flex-col items-center justify-center gap-4">
+                      <div className="w-6 h-6 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                      <p className="text-xs text-white/40 uppercase tracking-widest font-bold">Carregando o Inabalável 💔</p>
+                    </div>
+                  </td>
                 </tr>
               ) : filteredUsers.length === 0 ? (
                 <tr>

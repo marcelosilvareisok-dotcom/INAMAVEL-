@@ -130,7 +130,7 @@ export default function NewProject() {
             <div className="w-16 h-16 border-2 border-white/10 border-t-white rounded-full animate-spin" />
             <Sparkles className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white/50" size={20} />
           </div>
-          <h2 className="text-xl font-medium mb-3 text-white">Criando seu projeto...</h2>
+          <h2 className="text-xl font-medium mb-3 text-white uppercase tracking-widest font-black">Carregando o Inabalável 💔</h2>
           <p className="text-sm text-white/40 mb-8 max-w-sm">
             Nossa IA está estruturando sua ideia. Isso levará apenas alguns segundos.
           </p>

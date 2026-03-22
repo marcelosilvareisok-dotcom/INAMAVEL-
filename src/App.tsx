@@ -60,7 +60,7 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
             className="w-full h-full bg-gradient-to-r from-transparent via-purple-500 to-transparent"
           />
         </div>
-        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20">Sincronizando Memória...</p>
+        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40">Carregando o Inabalável 💔</p>
       </div>
     </div>
   );

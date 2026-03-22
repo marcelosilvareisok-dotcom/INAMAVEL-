@@ -36,7 +36,10 @@ export default function Timeline() {
       <h1 className="text-3xl font-black text-white">Linha do Tempo</h1>
       
       {loading ? (
-        <div className="text-white/40">Carregando...</div>
+        <div className="flex flex-col items-center justify-center py-20 gap-4">
+          <div className="w-6 h-6 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+          <p className="text-xs text-white/40 uppercase tracking-widest font-bold">Carregando o Inabalável 💔</p>
+        </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {projects.map((project) => (

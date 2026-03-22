@@ -325,7 +325,7 @@ export default function Dashboard() {
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20 gap-4">
             <div className="w-6 h-6 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-            <p className="text-xs text-white/40">Carregando projetos...</p>
+            <p className="text-xs text-white/40 uppercase tracking-widest font-bold">Carregando o Inabalável 💔</p>
           </div>
         ) : filteredProjects.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

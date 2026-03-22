@@ -99,6 +99,7 @@ export default function App() {
         
         // Check if it's the first time seeing the welcome message
         if (!data.hasSeenWelcome) {
+          console.log('Exibindo WelcomeModal para o usuário:', user.uid);
           setShowWelcome(true);
         }
 
@@ -116,6 +117,7 @@ export default function App() {
   }, [user]);
 
   const handleCloseWelcome = async () => {
+    console.log('Fechando WelcomeModal');
     setShowWelcome(false);
     if (user) {
       await updateDoc(doc(db, 'users', user.uid), {
@@ -126,7 +128,7 @@ export default function App() {
 
   const handleExplore = () => {
     handleCloseWelcome();
-    // Navigate to docs or hub
+    // Use window.location for now as we are outside Router context for navigation hook
     window.location.href = '/docs';
   };
 

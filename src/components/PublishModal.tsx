@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Github, Loader2, Linkedin, CheckCircle } from 'lucide-react';
+import { auth, githubProvider } from '../firebase';
+import { signInWithPopup, GithubAuthProvider } from 'firebase/auth';
 
 interface PublishModalProps {
   isOpen: boolean;
@@ -11,7 +13,6 @@ interface PublishModalProps {
 }
 
 export default function PublishModal({ isOpen, onClose, onPublish, projectName, projectSlug }: PublishModalProps) {
-  const [githubToken, setGithubToken] = useState('');
   const [repoOwner, setRepoOwner] = useState('');
   const [repoName, setRepoName] = useState('');
   const [loading, setLoading] = useState(false);
@@ -23,7 +24,15 @@ export default function PublishModal({ isOpen, onClose, onPublish, projectName, 
     setLoading(true);
     setError('');
     try {
-      await onPublish({ githubToken, repoOwner, repoName });
+      const result = await signInWithPopup(auth, githubProvider);
+      const credential = GithubAuthProvider.credentialFromResult(result);
+      const token = credential?.accessToken;
+
+      if (!token) {
+        throw new Error('Não foi possível obter o token do GitHub.');
+      }
+
+      await onPublish({ githubToken: token, repoOwner, repoName });
       setSuccess(true);
     } catch (err: any) {
       setError(err.message || 'Erro ao publicar');
@@ -87,16 +96,6 @@ export default function PublishModal({ isOpen, onClose, onPublish, projectName, 
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-xs font-medium text-white/60 mb-1.5">GitHub Personal Access Token</label>
-                  <input
-                    type="password"
-                    value={githubToken}
-                    onChange={(e) => setGithubToken(e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg py-2 px-3 text-sm text-white focus:border-white/30 focus:outline-none"
-                    required
-                  />
-                </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-medium text-white/60 mb-1.5">Dono do Repo</label>
@@ -128,7 +127,7 @@ export default function PublishModal({ isOpen, onClose, onPublish, projectName, 
                   className="w-full py-2.5 bg-white text-black text-sm font-medium rounded-lg hover:bg-white/90 transition-all flex items-center justify-center gap-2"
                 >
                   {loading ? <Loader2 className="animate-spin" size={16} /> : <Github size={16} />}
-                  {loading ? 'Publicando...' : 'Publicar no GitHub'}
+                  {loading ? 'Conectando e Publicando...' : 'Conectar GitHub e Publicar'}
                 </button>
               </form>
             )}

@@ -392,6 +392,7 @@ export default function Dashboard() {
           onClose={() => setPublishProject(null)}
           onPublish={handlePublish}
           projectName={publishProject.name}
+          projectSlug={publishProject.slug}
         />
       )}
 

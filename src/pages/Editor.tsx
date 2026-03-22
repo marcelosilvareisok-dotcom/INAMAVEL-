@@ -433,6 +433,7 @@ export default function Editor() {
           isOpen={showPublishModal} 
           onClose={() => setShowPublishModal(false)} 
           projectName={project.name}
+          projectSlug={project.slug}
           onPublish={async (config) => {
             const response = await fetch('/api/publish', {
               method: 'POST',

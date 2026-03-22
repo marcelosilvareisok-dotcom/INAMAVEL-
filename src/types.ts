@@ -6,6 +6,9 @@ export interface UserProfile {
   coins: number;
   createdAt: string;
   role: 'user' | 'admin';
+  fcmToken?: string;
+  notificationsEnabled?: boolean;
+  hasSeenWelcome?: boolean;
 }
 
 export interface Project {

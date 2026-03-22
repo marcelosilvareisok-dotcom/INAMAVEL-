@@ -2,13 +2,15 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { auth, db } from './firebase';
 import { onAuthStateChanged } from 'firebase/auth';
-import { doc, onSnapshot } from 'firebase/firestore';
+import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
 import { handleFirestoreError, OperationType } from './utils/firestore-errors';
 import { motion } from 'motion/react';
 import { Heart } from 'lucide-react';
 import { UserProfile } from './types';
 import ErrorBoundary from './components/ErrorBoundary';
 import SplashScreen from './components/SplashScreen';
+import WelcomeModal from './components/WelcomeModal';
+import { requestNotificationPermission } from './services/notifications';
 
 // Pages
 import Home from './pages/Home';
@@ -72,6 +74,7 @@ export default function App() {
   const [profile, setProfile] = React.useState<UserProfile | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [showSplash, setShowSplash] = React.useState(true);
+  const [showWelcome, setShowWelcome] = React.useState(false);
 
   React.useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, (u) => {
@@ -88,9 +91,20 @@ export default function App() {
   React.useEffect(() => {
     if (!user) return;
 
-    const unsubscribeProfile = onSnapshot(doc(db, 'users', user.uid), (doc) => {
-      if (doc.exists()) {
-        setProfile(doc.data() as UserProfile);
+    const unsubscribeProfile = onSnapshot(doc(db, 'users', user.uid), (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data() as UserProfile;
+        setProfile(data);
+        
+        // Check if it's the first time seeing the welcome message
+        if (!data.hasSeenWelcome) {
+          setShowWelcome(true);
+        }
+
+        // Request notification permission if not already enabled
+        if (data.notificationsEnabled === undefined) {
+          requestNotificationPermission(user.uid);
+        }
       }
       setLoading(false);
     }, (error) => {
@@ -100,9 +114,29 @@ export default function App() {
     return () => unsubscribeProfile();
   }, [user]);
 
+  const handleCloseWelcome = async () => {
+    setShowWelcome(false);
+    if (user) {
+      await updateDoc(doc(db, 'users', user.uid), {
+        hasSeenWelcome: true
+      });
+    }
+  };
+
+  const handleExplore = () => {
+    handleCloseWelcome();
+    // Navigate to docs or hub
+    window.location.href = '/docs';
+  };
+
   return (
     <ErrorBoundary>
       {showSplash && <SplashScreen onComplete={() => setShowSplash(false)} />}
+      <WelcomeModal 
+        isOpen={showWelcome} 
+        onClose={handleCloseWelcome} 
+        onExplore={handleExplore}
+      />
       <Router>
         <Routes>
           {/* Public Routes without Layout */}

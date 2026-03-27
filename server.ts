@@ -172,7 +172,9 @@ app.post("/api/update-icon", (req, res) => {
 
 const isProd = process.env.NODE_ENV === "production" || !!process.env.VERCEL;
 
-if (isProd) {
+// In Vercel, static files are served by the CDN, not the Express server.
+// We only serve static files if we are in production but NOT on Vercel.
+if (isProd && !process.env.VERCEL) {
   console.log("Starting server in PRODUCTION mode (static serving)");
   const distPath = path.join(process.cwd(), 'dist');
   
@@ -191,7 +193,7 @@ if (isProd) {
       res.status(404).send('Frontend not found. Please run build first.');
     }
   });
-} else {
+} else if (!isProd) {
   console.log("Starting server in DEVELOPMENT mode with Vite middleware");
   const startDevServer = async () => {
     try {

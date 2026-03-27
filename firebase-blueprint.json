@@ -11,7 +11,12 @@
         "photoURL": { "type": "string" },
         "coins": { "type": "number" },
         "createdAt": { "type": "string", "format": "date-time" },
-        "role": { "type": "string", "enum": ["user", "admin"] }
+        "role": { "type": "string", "enum": ["user", "admin"] },
+        "hasSeenWelcome": { "type": "boolean" },
+        "fcmToken": { "type": "string" },
+        "notificationsEnabled": { "type": "boolean" },
+        "phone": { "type": "string" },
+        "objective": { "type": "string" }
       },
       "required": ["uid", "email", "coins", "createdAt", "role"]
     },
@@ -35,7 +40,7 @@
         "isForSale": { "type": "boolean" },
         "price": { "type": "number" }
       },
-      "required": ["id", "userId", "name", "type", "content", "status", "createdAt", "updatedAt", "slug"]
+      "required": ["id", "userId", "name", "type", "content", "status", "createdAt", "updatedAt", "slug", "objective"]
     },
     "Transaction": {
       "title": "Transaction",

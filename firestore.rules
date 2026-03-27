@@ -45,7 +45,7 @@ service cloud.firestore {
              (!('objective' in data) || (data.objective is string && data.objective.size() >= 0 && data.objective.size() < 500));
     }
     function isValidProject(data) {
-      return hasOnlyAllowedFields(['id', 'userId', 'name', 'type', 'content', 'status', 'slug', 'githubUrl', 'updatedAt', 'isPublic', 'isForSale', 'price']) &&
+      return hasOnlyAllowedFields(['id', 'userId', 'name', 'type', 'content', 'status', 'slug', 'githubUrl', 'updatedAt', 'isPublic', 'isForSale', 'price', 'objective']) &&
              data.id is string && data.id.size() > 0 && data.id.size() < 100 &&
              data.userId is string && data.userId.size() > 0 && data.userId.size() < 100 &&
              data.name is string && data.name.size() > 0 && data.name.size() < 100 &&
@@ -54,6 +54,7 @@ service cloud.firestore {
              data.status in ['draft', 'published'] &&
              data.slug is string && data.slug.size() > 0 && data.slug.size() < 100 &&
              (!('githubUrl' in data) || (data.githubUrl is string && data.githubUrl.size() > 0 && data.githubUrl.size() < 500)) &&
+             (!('objective' in data) || (data.objective is string && data.objective.size() >= 0 && data.objective.size() < 1000)) &&
              (!('updatedAt' in data) || (data.updatedAt is string && data.updatedAt.size() > 0 && data.updatedAt.size() < 100)) &&
              (!('isPublic' in data) || data.isPublic is bool) &&
              (!('isForSale' in data) || data.isForSale is bool) &&

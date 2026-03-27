@@ -161,7 +161,7 @@ export default function App() {
           <Router>
             <Routes>
               {/* Public Routes without Layout */}
-              <Route path="/" element={<Home />} />
+              <Route path="/" element={<Portfolio />} />
               <Route path="/login" element={<Login />} />
               
               {/* Editor has its own custom layout */}

@@ -12,20 +12,31 @@ import {
   Zap,
   Heart,
   X,
-  ArrowRight
+  ArrowRight,
+  LayoutDashboard,
+  LogIn,
+  PlusCircle
 } from 'lucide-react';
 import { collection, query, where, orderBy, onSnapshot } from 'firebase/firestore';
 import { db, auth } from '../firebase';
+import { onAuthStateChanged } from 'firebase/auth';
 import { Project } from '../types';
 import { handleFirestoreError, OperationType } from '../utils/firestore-errors';
+import { Link, useNavigate } from 'react-router-dom';
 
 export default function Portfolio() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [showProjectsModal, setShowProjectsModal] = useState(false);
+  const [user, setUser] = useState<any>(null);
   const projectsRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
+    const unsubscribeAuth = onAuthStateChanged(auth, (u) => {
+      setUser(u);
+    });
+
     // Fetch public projects or user's projects
     const q = query(
       collection(db, 'projects'),
@@ -33,7 +44,7 @@ export default function Portfolio() {
       orderBy('updatedAt', 'desc')
     );
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
+    const unsubscribeProjects = onSnapshot(q, (snapshot) => {
       const projectsData = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
@@ -45,15 +56,58 @@ export default function Portfolio() {
       setLoading(false);
     });
 
-    return () => unsubscribe();
+    return () => {
+      unsubscribeAuth();
+      unsubscribeProjects();
+    };
   }, []);
 
   const scrollToProjects = () => {
     projectsRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  // Hardcoded Inabalável Project for the modal
+  const inabalavelProject = {
+    id: 'inabalavel-platform',
+    name: 'Inabalável Platform',
+    objective: 'A plataforma definitiva para desenvolvimento de software e automação com Inteligência Artificial.',
+    type: 'app' as const,
+    isInternal: true,
+    path: '/dashboard'
+  };
+
+  const allProjectsForModal = [inabalavelProject, ...projects];
+
   return (
     <div className="min-h-screen bg-[#050505] text-white selection:bg-purple-500/30">
+      {/* Navigation Bar (Minimal) */}
+      <nav className="fixed top-0 w-full z-[60] px-6 py-6 flex justify-between items-center bg-gradient-to-b from-black/50 to-transparent backdrop-blur-sm">
+        <Link to="/" className="flex items-center gap-2">
+          <Heart size={24} className="text-red-500 fill-red-500" />
+          <span className="font-black text-xl tracking-tighter uppercase">Inabalável</span>
+        </Link>
+        
+        <div className="flex items-center gap-4">
+          {user ? (
+            <Link 
+              to="/dashboard"
+              className="px-6 py-2 bg-white/10 hover:bg-white/20 border border-white/10 rounded-full text-xs font-black uppercase tracking-widest transition-all flex items-center gap-2"
+            >
+              <LayoutDashboard size={14} />
+              Dashboard
+            </Link>
+          ) : (
+            <Link 
+              to="/login"
+              className="px-6 py-2 bg-white text-black hover:bg-white/90 rounded-full text-xs font-black uppercase tracking-widest transition-all flex items-center gap-2"
+            >
+              <LogIn size={14} />
+              Entrar
+            </Link>
+          )}
+        </div>
+      </nav>
+
       {/* Hero Section */}
       <section className="relative min-h-screen flex flex-col items-center justify-center px-6 pt-20 overflow-hidden">
         {/* Background Glows */}
@@ -320,42 +374,54 @@ export default function Portfolio() {
               {/* Modal Content */}
               <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {projects.length > 0 ? (
-                    projects.map((project) => (
-                      <div 
-                        key={project.id}
-                        className="group p-6 bg-white/5 border border-white/10 rounded-3xl hover:bg-white/[0.08] transition-all cursor-pointer"
-                      >
-                        <div className="flex items-start justify-between mb-4">
-                          <div className="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center">
-                            {project.type === 'app' ? <Bot size={20} className="text-blue-500" /> : <Zap size={20} className="text-yellow-500" />}
-                          </div>
-                          <ArrowRight size={18} className="text-white/20 group-hover:text-purple-500 group-hover:translate-x-1 transition-all" />
+                  {allProjectsForModal.map((project: any) => (
+                    <div 
+                      key={project.id}
+                      onClick={() => {
+                        if (project.isInternal) {
+                          navigate(project.path);
+                        } else if (project.githubUrl) {
+                          window.open(project.githubUrl, '_blank');
+                        } else {
+                          navigate(`/project/${project.id}`);
+                        }
+                        setShowProjectsModal(false);
+                      }}
+                      className="group p-6 bg-white/5 border border-white/10 rounded-3xl hover:bg-white/[0.08] transition-all cursor-pointer"
+                    >
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center">
+                          {project.id === 'inabalavel-platform' ? (
+                            <Heart size={20} className="text-red-500 fill-red-500" />
+                          ) : project.type === 'app' ? (
+                            <Bot size={20} className="text-blue-500" />
+                          ) : (
+                            <Zap size={20} className="text-yellow-500" />
+                          )}
                         </div>
-                        <h3 className="text-xl font-bold mb-2">{project.name}</h3>
-                        <p className="text-sm text-white/40 line-clamp-2 mb-4">{project.objective}</p>
-                        <div className="flex items-center gap-2">
-                          <span className="text-[10px] font-bold uppercase tracking-widest text-purple-400 px-2 py-1 bg-purple-400/10 rounded-md">
-                            {project.type}
+                        <ArrowRight size={18} className="text-white/20 group-hover:text-purple-500 group-hover:translate-x-1 transition-all" />
+                      </div>
+                      <h3 className="text-xl font-bold mb-2">{project.name}</h3>
+                      <p className="text-sm text-white/40 line-clamp-2 mb-4">{project.objective}</p>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-purple-400 px-2 py-1 bg-purple-400/10 rounded-md">
+                          {project.type}
+                        </span>
+                        {project.isInternal && (
+                          <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-400 px-2 py-1 bg-emerald-400/10 rounded-md">
+                            Plataforma
                           </span>
-                        </div>
+                        )}
                       </div>
-                    ))
-                  ) : (
-                    <div className="col-span-full py-20 text-center space-y-4">
-                      <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto text-white/10">
-                        <Code2 size={40} />
-                      </div>
-                      <p className="text-white/40 font-medium tracking-widest uppercase text-xs">Nenhum projeto público encontrado</p>
                     </div>
-                  )}
+                  ))}
                 </div>
               </div>
 
               {/* Modal Footer */}
               <div className="p-8 bg-white/5 border-t border-white/5 flex items-center justify-center">
                 <button 
-                  onClick={() => window.location.href = '/new'}
+                  onClick={() => navigate('/new')}
                   className="px-8 py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-full transition-all flex items-center gap-2"
                 >
                   <PlusCircle size={18} />
@@ -399,6 +465,3 @@ export default function Portfolio() {
     </div>
   );
 }
-
-// Missing import PlusCircle
-import { PlusCircle } from 'lucide-react';

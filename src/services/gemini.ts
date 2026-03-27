@@ -4,9 +4,12 @@ let aiClient: GoogleGenAI | null = null;
 
 function getAiClient(): GoogleGenAI {
   if (!aiClient) {
-    const apiKey = process.env.GEMINI_API_KEY;
+    // In AI Studio, it's process.env.GEMINI_API_KEY
+    // Outside, it might be import.meta.env.VITE_GEMINI_API_KEY if provided via Vite
+    const apiKey = process.env.GEMINI_API_KEY || (import.meta.env ? import.meta.env.VITE_GEMINI_API_KEY : "");
+    
     if (!apiKey) {
-      console.error("ERRO: GEMINI_API_KEY não encontrada no ambiente.");
+      console.error("ERRO: GEMINI_API_KEY não encontrada no ambiente. Certifique-se de configurar a chave de API.");
     }
     aiClient = new GoogleGenAI({ apiKey: apiKey || "" });
   }

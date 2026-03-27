@@ -40,29 +40,6 @@ if (!process.env.VERCEL) {
 
 app.use(express.json({ limit: '10mb' }));
 
-// Helper function to get PayPal Access Token
-async function getPayPalAccessToken() {
-  const clientId = process.env.PAYPAL_CLIENT_ID;
-  const clientSecret = process.env.PAYPAL_CLIENT_SECRET;
-  
-  if (!clientId || !clientSecret) {
-    throw new Error('PayPal credentials missing');
-  }
-
-  const auth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
-  const response = await fetch('https://api-m.sandbox.paypal.com/v1/oauth2/token', {
-    method: 'POST',
-    body: 'grant_type=client_credentials',
-    headers: {
-      Authorization: `Basic ${auth}`,
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
-  });
-
-  const data = await response.json();
-  return data.access_token;
-}
-
 // API Routes
 app.post("/api/publish", async (req, res) => {
   const { githubToken, repoOwner, repoName, files, commitMessage } = req.body;
@@ -190,78 +167,6 @@ app.post("/api/update-icon", (req, res) => {
   } catch (error) {
     console.error('Error updating manifest:', error);
     res.status(500).json({ error: 'Failed to update manifest' });
-  }
-});
-
-app.post("/api/paypal/create-order", async (req, res) => {
-  try {
-    const { price, coins, userId } = req.body;
-    const accessToken = await getPayPalAccessToken();
-
-    const response = await fetch('https://api-m.sandbox.paypal.com/v2/checkout/orders', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${accessToken}`,
-      },
-      body: JSON.stringify({
-        intent: 'CAPTURE',
-        purchase_units: [
-          {
-            reference_id: `coins-${coins}-${userId}`,
-            amount: {
-              currency_code: 'BRL',
-              value: price.toString(),
-            },
-            custom_id: JSON.stringify({ userId, coins })
-          },
-        ],
-      }),
-    });
-
-    const data = await response.json();
-    res.json(data);
-  } catch (error: any) {
-    console.error('PayPal create order error:', error);
-    res.status(500).json({ error: 'Erro ao criar pedido no PayPal' });
-  }
-});
-
-app.post("/api/paypal/capture-order", async (req, res) => {
-  try {
-    const { orderID } = req.body;
-    const accessToken = await getPayPalAccessToken();
-
-    const response = await fetch(`https://api-m.sandbox.paypal.com/v2/checkout/orders/${orderID}/capture`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
-
-    const data = await response.json();
-    
-    // Notify user via WebSocket
-    if (data.status === 'COMPLETED') {
-      const customId = data.purchase_units[0].payments.captures[0].custom_id;
-      if (customId) {
-        const { userId, coins } = JSON.parse(customId);
-        const io = req.app.get("io");
-        if (io) {
-          io.to(userId).emit("notification", {
-            title: "Pagamento Aprovado",
-            message: `Você comprou ${coins} moedas com sucesso!`,
-            type: "success"
-          });
-        }
-      }
-    }
-
-    res.json(data);
-  } catch (error: any) {
-    console.error('PayPal capture error:', error);
-    res.status(500).json({ error: 'Erro ao capturar pedido no PayPal' });
   }
 });
 

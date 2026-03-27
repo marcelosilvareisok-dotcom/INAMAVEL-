@@ -172,29 +172,6 @@ export default function Dashboard() {
     }
   }, []);
 
-  React.useEffect(() => {
-    if (!auth.currentUser) return;
-
-    const q = query(
-      collection(db, 'projects'),
-      where('userId', '==', auth.currentUser.uid),
-      orderBy('updatedAt', 'desc')
-    );
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const projectsData = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as Project[];
-      setProjects(projectsData);
-      setLoading(false);
-    }, (error) => {
-      handleFirestoreError(error, OperationType.LIST, 'projects');
-    });
-
-    return () => unsubscribe();
-  }, []);
-
   const filteredProjects = projects.filter(p => 
     p.name.toLowerCase().includes(searchTerm.toLowerCase())
   );

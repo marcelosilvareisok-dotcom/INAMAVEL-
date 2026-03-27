@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import PixDonation from '../components/PixDonation';
-import { Coins, Zap, ShieldCheck } from 'lucide-react';
-import { PayPalButtons } from "@paypal/react-paypal-js";
+import { Coins, Zap, ShieldCheck, CreditCard } from 'lucide-react';
+import { MercadoPagoButton } from '../components/MercadoPagoButton';
 import { auth, db } from '../firebase';
 
 const PACKAGES = [
@@ -12,61 +12,6 @@ const PACKAGES = [
 
 export default function Pricing() {
   const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-
-  const handlePayPalCreateOrder = async (data: any, actions: any, pkg: any) => {
-    try {
-      const response = await fetch('/api/paypal/create-order', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          price: pkg.price,
-          coins: pkg.coins,
-          userId: auth.currentUser?.uid
-        })
-      });
-      const order = await response.json();
-      return order.id;
-    } catch (error) {
-      console.error("Error creating PayPal order:", error);
-      throw error;
-    }
-  };
-
-  const handlePayPalApprove = async (data: any, actions: any) => {
-    try {
-      setLoading(true);
-      const response = await fetch('/api/paypal/capture-order', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          orderID: data.orderID
-        })
-      });
-      const result = await response.json();
-      if (result.status === 'COMPLETED') {
-        // Update user coins in Firestore
-        if (auth.currentUser) {
-          const { doc, getDoc, updateDoc } = await import('firebase/firestore');
-          const userRef = doc(db, 'users', auth.currentUser.uid);
-          const userSnap = await getDoc(userRef);
-          if (userSnap.exists()) {
-            const currentCoins = userSnap.data().coins || 0;
-            const customId = result.purchase_units[0].payments.captures[0].custom_id;
-            const { coins } = JSON.parse(customId);
-            await updateDoc(userRef, {
-              coins: currentCoins + coins
-            });
-          }
-        }
-        setSelectedPackage(null);
-      }
-    } catch (error) {
-      console.error("Error capturing PayPal order:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <div className="space-y-12 pb-20 max-w-7xl mx-auto px-4">
@@ -111,19 +56,19 @@ export default function Pricing() {
             <div className="mt-auto space-y-4">
               {selectedPackage === pkg.id ? (
                 <div className="space-y-4">
-                  <div className="relative z-0">
-                    <PayPalButtons 
-                      style={{ layout: "vertical", color: "gold", shape: "rect" }}
-                      createOrder={(data, actions) => handlePayPalCreateOrder(data, actions, pkg)}
-                      onApprove={handlePayPalApprove}
-                      onCancel={() => setSelectedPackage(null)}
-                    />
-                  </div>
+                  <MercadoPagoButton 
+                    title={`Pacote ${pkg.title} - ${pkg.coins} Moedas`}
+                    price={pkg.price}
+                    quantity={1}
+                    coins={pkg.coins}
+                    userId={auth.currentUser?.uid || 'anonymous'}
+                  />
+                  
                   <button 
                     onClick={() => setSelectedPackage(null)}
                     className="w-full py-2 text-sm text-white/40 hover:text-white transition-colors"
                   >
-                    Cancelar
+                    Voltar
                   </button>
                 </div>
               ) : (

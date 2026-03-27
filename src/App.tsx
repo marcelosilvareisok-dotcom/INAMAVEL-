@@ -27,6 +27,7 @@ import Docs from './pages/Docs';
 import Timeline from './pages/Timeline';
 import ProjectDetail from './pages/ProjectDetail';
 import EngineeringHub from './pages/EngineeringHub';
+import Portfolio from './pages/Portfolio';
 
 import AdminDashboard from './pages/AdminDashboard';
 
@@ -224,6 +225,7 @@ export default function App() {
                           </AuthGuard>
                         } 
                       />
+                      <Route path="/portfolio" element={<Portfolio />} />
                       <Route path="*" element={<Navigate to="/dashboard" replace />} />
                     </Routes>
                   </Layout>

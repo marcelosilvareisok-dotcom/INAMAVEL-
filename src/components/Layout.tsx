@@ -11,7 +11,8 @@ import {
   ShieldCheck,
   MessageCircle,
   BookOpen,
-  Terminal
+  Terminal,
+  Briefcase
 } from 'lucide-react';
 import { auth } from '../firebase';
 import { signOut } from 'firebase/auth';
@@ -37,6 +38,7 @@ export default function Layout({ children, user, coins }: LayoutProps) {
     { name: 'Sobre o CEO', path: '/about', icon: User },
     { name: 'Docs', path: '/docs', icon: BookOpen },
     { name: 'Engineering Hub', path: '/hub', icon: Terminal },
+    { name: 'Portfólio', path: '/portfolio', icon: Briefcase },
     { name: 'Linha do Tempo', path: '/timeline', icon: LayoutDashboard },
   ];
 

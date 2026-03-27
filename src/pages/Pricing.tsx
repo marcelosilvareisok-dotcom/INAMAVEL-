@@ -68,6 +68,35 @@ export default function Pricing() {
     }
   };
 
+  const handleMercadoPagoBuy = async (pkg: typeof PACKAGES[0]) => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/create-preference', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: pkg.title,
+          price: pkg.price,
+          quantity: 1,
+          coins: pkg.coins,
+          userId: auth.currentUser?.uid || 'guest'
+        })
+      });
+      
+      const data = await response.json();
+      if (data.init_point) {
+        window.location.href = data.init_point;
+      } else {
+        alert('Erro: ' + (data.error || 'Falha ao iniciar Mercado Pago'));
+      }
+    } catch (error) {
+      console.error('Mercado Pago Error:', error);
+      alert('Erro ao conectar com Mercado Pago.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-12 pb-20 max-w-7xl mx-auto px-4">
       <div className="text-center space-y-4">
@@ -118,6 +147,18 @@ export default function Pricing() {
                       onApprove={handlePayPalApprove}
                       onCancel={() => setSelectedPackage(null)}
                     />
+                    <div className="flex items-center gap-4 py-2">
+                      <div className="h-px bg-white/10 flex-1"></div>
+                      <span className="text-white/40 text-xs">OU</span>
+                      <div className="h-px bg-white/10 flex-1"></div>
+                    </div>
+                    <button
+                      onClick={() => handleMercadoPagoBuy(pkg)}
+                      disabled={loading}
+                      className="w-full py-3 bg-[#009ee3] hover:bg-[#008cc9] text-white font-bold rounded-[4px] transition-colors flex items-center justify-center gap-2"
+                    >
+                      {loading ? 'Carregando...' : 'Pagar com Mercado Pago'}
+                    </button>
                   </div>
                   <button 
                     onClick={() => setSelectedPackage(null)}

@@ -10,6 +10,7 @@ import { UserProfile } from './types';
 import ErrorBoundary from './components/ErrorBoundary';
 import SplashScreen from './components/SplashScreen';
 import WelcomeModal from './components/WelcomeModal';
+import RedirectNotice from './components/RedirectNotice';
 import { requestNotificationPermission } from './services/notifications';
 import { SocketProvider } from './contexts/SocketContext';
 import { PayPalScriptProvider } from "@paypal/react-paypal-js";
@@ -149,6 +150,7 @@ export default function App() {
 
   return (
     <ErrorBoundary>
+      <RedirectNotice />
       <PayPalScriptProvider options={initialOptions}>
         <SocketProvider>
           {showSplash && <SplashScreen onComplete={() => setShowSplash(false)} />}

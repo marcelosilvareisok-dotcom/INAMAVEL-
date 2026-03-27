@@ -13,30 +13,26 @@ const app = express();
 const PORT = 3000;
 
 const httpServer = createServer(app);
-let io: Server | null = null;
+const io = new Server(httpServer, {
+  cors: {
+    origin: "*",
+  }
+});
 
-if (!process.env.VERCEL) {
-  io = new Server(httpServer, {
-    cors: {
-      origin: "*",
-    }
+io.on("connection", (socket) => {
+  console.log("User connected:", socket.id);
+  
+  socket.on("join", (userId) => {
+    socket.join(userId);
+    console.log(`User ${userId} joined room`);
   });
 
-  io.on("connection", (socket) => {
-    console.log("User connected:", socket.id);
-    
-    socket.on("join", (userId) => {
-      socket.join(userId);
-      console.log(`User ${userId} joined room`);
-    });
-
-    socket.on("disconnect", () => {
-      console.log("User disconnected:", socket.id);
-    });
+  socket.on("disconnect", () => {
+    console.log("User disconnected:", socket.id);
   });
+});
 
-  app.set("io", io);
-}
+app.set("io", io);
 
 app.use(express.json({ limit: '10mb' }));
 
@@ -248,13 +244,11 @@ app.post("/api/paypal/capture-order", async (req, res) => {
       if (customId) {
         const { userId, coins } = JSON.parse(customId);
         const io = req.app.get("io");
-        if (io) {
-          io.to(userId).emit("notification", {
-            title: "Pagamento Aprovado",
-            message: `Você comprou ${coins} moedas com sucesso!`,
-            type: "success"
-          });
-        }
+        io.to(userId).emit("notification", {
+          title: "Pagamento Aprovado",
+          message: `Você comprou ${coins} moedas com sucesso!`,
+          type: "success"
+        });
       }
     }
 
@@ -298,9 +292,6 @@ const startServer = async () => {
   }
 };
 
-// Only start the server if not running as a Vercel function
-if (!process.env.VERCEL) {
-  startServer();
-}
+startServer();
 
 export default app;

@@ -1,16 +1,17 @@
 {
+  "functions": {
+    "api/index.ts": {
+      "includeFiles": "dist/**"
+    }
+  },
   "rewrites": [
     {
       "source": "/api/(.*)",
       "destination": "/api/index.ts"
     },
     {
-      "source": "/assets/(.*)",
-      "destination": "/assets/$1"
-    },
-    {
-      "source": "/((?!api|assets|public|.*\\.).*)",
-      "destination": "/index.html"
+      "source": "/(.*)",
+      "destination": "/api/index.ts"
     }
   ]
 }

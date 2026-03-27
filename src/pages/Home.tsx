@@ -32,55 +32,40 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white selection:bg-purple-500/30 font-sans overflow-x-hidden">
+    <div className="min-h-screen bg-brand-bg text-white selection:bg-white/30 font-sans overflow-x-hidden">
+      <div className="atmosphere" />
+      
       {/* Hero Section - Recipe 2: Editorial */}
       <section className="relative min-h-screen flex flex-col items-center justify-center px-4 overflow-hidden pt-20">
-        {/* Background Gradients */}
-        <div className="absolute inset-0 -z-10">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(139,92,246,0.1),transparent_50%)]" />
-          <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-purple-600/10 blur-[120px] rounded-full animate-pulse" />
-          <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-red-600/5 blur-[120px] rounded-full animate-pulse delay-700" />
-        </div>
-
         <div className="max-w-7xl mx-auto text-center relative">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-white/5 border border-white/10 mb-12 backdrop-blur-md"
+            className="inline-flex items-center gap-2 px-6 py-2 rounded-full glass mb-12"
           >
-            <Sparkles size={16} className="text-purple-400" />
-            <span className="text-xs font-black uppercase tracking-[0.3em] text-white/60">A Revolução dos Ignorados</span>
+            <Sparkles size={16} className="text-white/60" />
+            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white/40">A Revolução dos Ignorados</span>
           </motion.div>
 
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            className="relative w-full max-w-[100vw] overflow-hidden px-2"
+            transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+            className="relative w-full max-w-[100vw] overflow-hidden px-2 mb-12"
           >
-            <h1 className="text-[14vw] sm:text-[12vw] md:text-[10vw] lg:text-[9vw] font-black tracking-tighter leading-[0.85] uppercase mb-8 break-words hyphens-auto">
+            <h1 className="text-[16vw] sm:text-[14vw] md:text-[12vw] lg:text-[10vw] font-black tracking-tighter leading-[0.8] uppercase mb-4 text-brand-gradient">
               CRIE O <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 via-red-500 to-purple-500 bg-[length:200%_auto] animate-gradient block w-full break-all sm:break-normal">EXTRAORDINÁRIO</span>
+              <span className="text-luxury lowercase opacity-80">extraordinário</span>
             </h1>
-            
-            {/* Floating Badges */}
-            <motion.div 
-              animate={{ y: [0, -20, 0], rotate: [0, 5, 0] }}
-              transition={{ duration: 5, repeat: Infinity }}
-              className="absolute -top-10 -right-10 hidden lg:block p-6 bg-white text-black rounded-[32px] shadow-2xl rotate-12"
-            >
-              <p className="text-[10px] font-black uppercase tracking-widest mb-1">Status</p>
-              <p className="text-2xl font-black italic">SEM LIMITES</p>
-            </motion.div>
           </motion.div>
 
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-lg md:text-2xl text-white/40 max-w-2xl mx-auto mb-16 leading-tight font-medium px-4"
+            className="text-lg md:text-xl text-white/40 max-w-xl mx-auto mb-16 leading-relaxed font-light px-4"
           >
-            Inabalável💔 é a plataforma definitiva para transformar sua dor em poder digital. 
+            Inabalável💔 é a plataforma definitiva para transformar sua visão em poder digital. 
             Crie sites, apps e sistemas complexos com a velocidade do pensamento.
           </motion.p>
 
@@ -88,35 +73,25 @@ export default function Home() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.3 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-6 w-full px-4"
+            className="flex flex-col sm:flex-row items-center justify-center gap-8 w-full px-4"
           >
             <Link
               to="/login"
-              className="group relative w-full sm:w-auto px-12 py-6 bg-white text-black font-black rounded-[32px] overflow-hidden transition-all hover:scale-105 active:scale-95 text-lg uppercase tracking-tighter"
+              className="group relative w-full sm:w-auto px-16 py-6 bg-white text-black font-black rounded-full overflow-hidden transition-all hover:scale-105 active:scale-95 text-xs uppercase tracking-[0.2em]"
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-red-500/20 translate-x-full group-hover:translate-x-0 transition-transform duration-500" />
               <span className="relative flex items-center justify-center gap-3">
-                Começar Agora <ArrowRight size={24} />
+                Começar Agora <ArrowRight size={18} />
               </span>
             </Link>
             
             {freeMode && (
-              <div className="flex items-center justify-center w-full sm:w-auto gap-3 px-8 py-6 bg-purple-500/10 border border-purple-500/20 rounded-[32px] text-purple-400 font-black uppercase tracking-widest text-xs animate-pulse">
-                <Zap size={20} />
+              <div className="flex items-center justify-center w-full sm:w-auto gap-3 px-8 py-6 glass rounded-full text-white/60 font-black uppercase tracking-widest text-[10px] animate-pulse">
+                <Zap size={16} />
                 Uso Ilimitado Ativo
               </div>
             )}
           </motion.div>
         </div>
-
-        {/* Scroll Indicator */}
-        <motion.div 
-          animate={{ y: [0, 10, 0] }}
-          transition={{ duration: 2, repeat: Infinity }}
-          className="absolute bottom-10 left-1/2 -translate-x-1/2 text-white/20 hidden md:block"
-        >
-          <div className="w-px h-12 bg-gradient-to-b from-white/20 to-transparent mx-auto" />
-        </motion.div>
       </section>
 
       {/* Features Grid */}
@@ -136,37 +111,31 @@ export default function Home() {
                 icon: Zap,
                 title: "IA de Elite",
                 desc: "Nossa inteligência artificial não apenas gera texto, ela entende a psicologia do seu público.",
-                color: "bg-yellow-500/20 text-yellow-500"
               },
               {
                 icon: Layout,
                 title: "Design Lovable",
                 desc: "Interfaces que as pessoas amam usar. Cada pixel é pensado para converter e encantar.",
-                color: "bg-purple-500/20 text-purple-500"
               },
               {
                 icon: Globe,
                 title: "Escala Global",
                 desc: "Publique em segundos e escale para milhões de usuários sem se preocupar com infraestrutura.",
-                color: "bg-blue-500/20 text-blue-500"
               },
               {
                 icon: Code,
                 title: "Código Limpo",
                 desc: "O que a IA gera é seu. Exporte código limpo, otimizado e pronto para produção.",
-                color: "bg-green-500/20 text-green-500"
               },
               {
                 icon: Smartphone,
                 title: "Mobile First",
                 desc: "Seu projeto nasce perfeito em qualquer tela. Do smartphone ao monitor ultra-wide.",
-                color: "bg-red-500/20 text-red-500"
               },
               {
                 icon: MousePointer2,
                 title: "Editor Intuitivo",
                 desc: "A liberdade de um designer com a facilidade de um editor de texto. Sem limites.",
-                color: "bg-orange-500/20 text-orange-500"
               }
             ].map((feature, i) => (
               <motion.div
@@ -175,16 +144,13 @@ export default function Home() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
-                className="p-10 rounded-[40px] bg-white/5 border border-white/10 hover:border-purple-500/50 transition-all group relative overflow-hidden"
+                className="p-12 rounded-[48px] glass glass-hover group relative overflow-hidden"
               >
-                <div className={`w-16 h-16 rounded-3xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform ${feature.color}`}>
-                  <feature.icon size={32} />
+                <div className="w-12 h-12 flex items-center justify-center mb-8 text-white/60 group-hover:text-white transition-colors">
+                  <feature.icon size={24} />
                 </div>
-                <h3 className="text-2xl font-black mb-4 uppercase tracking-tighter">{feature.title}</h3>
-                <p className="text-white/40 leading-relaxed font-medium">{feature.desc}</p>
-                
-                {/* Decorative Element */}
-                <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-white/5 rounded-full blur-2xl group-hover:bg-purple-500/10 transition-all" />
+                <h3 className="text-xl font-black mb-4 uppercase tracking-tighter">{feature.title}</h3>
+                <p className="text-white/30 leading-relaxed font-light text-sm">{feature.desc}</p>
               </motion.div>
             ))}
           </div>

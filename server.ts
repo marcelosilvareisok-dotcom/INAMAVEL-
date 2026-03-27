@@ -170,42 +170,49 @@ app.post("/api/update-icon", (req, res) => {
   }
 });
 
-const startServer = async () => {
-  const isDev = process.env.NODE_ENV !== "production";
-  console.log(`Server environment: NODE_ENV=${process.env.NODE_ENV}, isDev=${isDev}`);
+const isProd = process.env.NODE_ENV === "production" || !!process.env.VERCEL;
 
-  if (isDev) {
-    console.log("Starting server in DEVELOPMENT mode with Vite middleware");
-    const { createServer: createViteServer } = await import("vite");
-    const vite = await createViteServer({
-      server: { middlewareMode: true },
-      appType: "spa",
-    });
-    app.use(vite.middlewares);
-  } else {
-    console.log("Starting server in PRODUCTION mode (static serving)");
-    const distPath = path.join(process.cwd(), 'dist');
-    
-    // Serve static files from dist
-    app.use(express.static(distPath));
-    
-    // Handle SPA routing - serve index.html for all non-API routes
-    app.get('*', (req, res) => {
-      res.sendFile(path.join(distPath, 'index.html'));
-    });
-  }
+if (isProd) {
+  console.log("Starting server in PRODUCTION mode (static serving)");
+  const distPath = path.join(process.cwd(), 'dist');
+  
+  // Serve static files from dist
+  app.use(express.static(distPath));
+  
+  // Handle SPA routing - serve index.html for all non-API routes
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api')) {
+      return next();
+    }
+    const indexPath = path.join(distPath, 'index.html');
+    if (fs.existsSync(indexPath)) {
+      res.sendFile(indexPath);
+    } else {
+      res.status(404).send('Frontend not found. Please run build first.');
+    }
+  });
+} else {
+  console.log("Starting server in DEVELOPMENT mode with Vite middleware");
+  const startDevServer = async () => {
+    try {
+      const { createServer: createViteServer } = await import("vite");
+      const vite = await createViteServer({
+        server: { middlewareMode: true },
+        appType: "spa",
+      });
+      app.use(vite.middlewares);
+    } catch (e) {
+      console.error("Failed to start Vite dev server:", e);
+    }
+  };
+  startDevServer();
+}
 
-  // Only listen if not running as a Vercel function
-  if (!process.env.VERCEL) {
-    httpServer.listen(PORT, "0.0.0.0", () => {
-      console.log(`Server running on http://localhost:${PORT}`);
-    });
-  }
-};
-
-// Only start the server if not running as a Vercel function
+// Only listen if not running as a Vercel function
 if (!process.env.VERCEL) {
-  startServer();
+  httpServer.listen(PORT, "0.0.0.0", () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+  });
 }
 
 export default app;
